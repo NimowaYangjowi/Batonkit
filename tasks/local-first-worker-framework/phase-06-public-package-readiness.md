@@ -67,17 +67,24 @@ git commit -m "docs: prepare public package release"
 
 ## Phase Review
 
-To be completed after implementation.
+- Regression risk: Low. This phase mainly adds docs, example files, and package metadata. Runtime package tests still pass.
+- API clarity: Good. Public docs now describe package boundaries and the main APIs by package.
+- Overengineering risk: Low. The example uses in-memory stores to stay inspectable; real Postgres wiring remains documented as the production replacement point.
+- Test gaps: The example app itself has no tests yet and was not included in root workspace verification. Add example-level smoke tests before a first public beta.
+- Docs gaps: README, API reference, failover drill, and release notes now exist. More tutorial depth is still needed before launch.
+- Performance/cost impact: Positive. Docs emphasize backup workers staying passive until failover.
+- Public-package ergonomics: Improved. Package metadata includes public publish config and side-effect declarations.
+- Security note: The Next.js example is intentionally excluded from root workspaces because the current latest Next dependency pulls a moderate `postcss` advisory. Root package audit passes with 0 vulnerabilities.
+- Later phase update: No later phases remain. Before public release, add live Postgres integration tests and run the failover drill against a real provider.
 
 ## Completion Checklist
 
-- [ ] Example app added
-- [ ] Public README completed
-- [ ] API reference added
-- [ ] Failover drill documented
-- [ ] Release metadata added
-- [ ] Full verification passes
-- [ ] Phase review completed
-- [ ] Phase committed
-- [ ] Later phase documents updated if needed
-
+- [x] Example app added
+- [x] Public README completed
+- [x] API reference added
+- [x] Failover drill documented
+- [x] Release metadata added
+- [x] Full verification passes
+- [x] Phase review completed
+- [x] Phase committed
+- [x] Later phase documents updated if needed

@@ -4,6 +4,10 @@
   "description": "Worker runtime for Local First Worker.",
   "type": "module",
   "license": "MIT",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

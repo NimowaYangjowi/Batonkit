@@ -7,8 +7,7 @@
   "license": "MIT",
   "packageManager": "npm@11.8.0",
   "workspaces": [
-    "packages/*",
-    "examples/*"
+    "packages/*"
   ],
   "scripts": {
     "build": "tsc -b packages/*",
@@ -24,4 +23,3 @@
     "vitest": "^4.0.8"
   }
 }
-

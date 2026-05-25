@@ -4,10 +4,27 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "echo \"example scaffold only\"",
-    "test": "echo \"example scaffold only\"",
-    "typecheck": "echo \"example scaffold only\"",
-    "lint": "echo \"example scaffold only\""
+    "dev": "next dev",
+    "worker:local": "tsx worker/local-worker.ts",
+    "worker:backup": "tsx worker/backup-worker.ts",
+    "build": "next build",
+    "test": "echo \"example has no tests yet\"",
+    "typecheck": "tsc --noEmit",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@local-first-worker/core": "0.0.0",
+    "@local-first-worker/next": "0.0.0",
+    "@local-first-worker/worker": "0.0.0",
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
   }
 }
-
