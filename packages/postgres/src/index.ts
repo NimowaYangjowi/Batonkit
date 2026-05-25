@@ -93,6 +93,31 @@ CREATE INDEX IF NOT EXISTS lfw_jobs_claim_idx
 `;
 }
 
+export function createControlPlaneMigrationSql(): string {
+  return `
+CREATE TABLE IF NOT EXISTS lfw_control_state (
+  id text PRIMARY KEY DEFAULT 'default',
+  mode text NOT NULL,
+  active_owner text NOT NULL,
+  failover_reason text,
+  failback_not_before timestamptz,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS lfw_worker_heartbeats (
+  platform text PRIMARY KEY,
+  worker_id text NOT NULL,
+  status text NOT NULL,
+  observed_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+INSERT INTO lfw_control_state (id, mode, active_owner)
+VALUES ('default', 'local_primary', 'local')
+ON CONFLICT (id) DO NOTHING;
+`;
+}
+
 export function postgresStore(client: QueryClient): JobStore {
   return {
     async enqueue(input: EnqueueInput) {

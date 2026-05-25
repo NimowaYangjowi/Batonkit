@@ -67,17 +67,23 @@ git commit -m "feat: add nextjs control plane"
 
 ## Phase Review
 
-To be completed after implementation.
+- Regression risk: Medium. Ownership gating can prevent workers from claiming jobs, so tests cover local default ownership and backup claim blocking.
+- API clarity: Good. Control primitives live in core; Next.js helpers are thin HTTP wrappers.
+- Overengineering risk: Low. The control store interface is small and does not assume a specific monitor or provider.
+- Test gaps: Route handler tests currently cover unauthorized mutation only. Authorized mutation is implemented through the same code path but should get more coverage before release.
+- Docs gaps: Basic control-plane docs were added in `docs/control-plane.md`.
+- Performance/cost impact: Positive. Claim gating prevents passive backup workers from polling work they should not own.
+- Public-package ergonomics: Good. Route handlers use standard Web `Request`/`Response`, matching Next.js App Router without importing Next.js.
+- Later phase update: Phase 05 can build failover decisions on top of `ControlStore.updateOwnership`.
 
 ## Completion Checklist
 
-- [ ] Ownership state added
-- [ ] Heartbeat state added
-- [ ] Claim gating implemented
-- [ ] Next.js route helpers added
-- [ ] Security checks added
-- [ ] Tests pass
-- [ ] Phase review completed
-- [ ] Phase committed
-- [ ] Later phase documents updated if needed
-
+- [x] Ownership state added
+- [x] Heartbeat state added
+- [x] Claim gating implemented
+- [x] Next.js route helpers added
+- [x] Security checks added
+- [x] Tests pass
+- [x] Phase review completed
+- [x] Phase committed
+- [x] Later phase documents updated if needed

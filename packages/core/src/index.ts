@@ -88,6 +88,76 @@ export interface MemoryJobStore extends JobStore {
   list: () => JobRecord[];
 }
 
+export const WORKER_PLATFORM_VALUES = ['local', 'backup'] as const;
+export const CONTROL_MODE_VALUES = [
+  'local_primary',
+  'backup_active',
+  'maintenance_override',
+] as const;
+
+export type WorkerPlatform = (typeof WORKER_PLATFORM_VALUES)[number];
+export type ControlMode = (typeof CONTROL_MODE_VALUES)[number];
+export type WorkerHealthStatus = 'ok' | 'degraded' | 'stopping';
+
+export interface WorkerHeartbeat {
+  platform: WorkerPlatform;
+  workerId: string;
+  status: WorkerHealthStatus;
+  observedAt: Date;
+}
+
+export interface RecordHeartbeatInput {
+  platform: WorkerPlatform;
+  workerId: string;
+  status?: WorkerHealthStatus;
+  observedAt?: Date;
+}
+
+export interface ControlState {
+  mode: ControlMode;
+  activeOwner: WorkerPlatform;
+  failoverReason: string | null;
+  failbackNotBefore: Date | null;
+  localHeartbeat: WorkerHeartbeat | null;
+  backupHeartbeat: WorkerHeartbeat | null;
+  updatedAt: Date;
+}
+
+export interface UpdateOwnershipInput {
+  mode: ControlMode;
+  activeOwner: WorkerPlatform;
+  failoverReason?: string | null;
+  failbackNotBefore?: Date | null;
+}
+
+export interface ControlStore {
+  getState: () => Promise<ControlState>;
+  updateOwnership: (input: UpdateOwnershipInput) => Promise<ControlState>;
+  recordHeartbeat: (input: RecordHeartbeatInput) => Promise<ControlState>;
+  allowClaims: (platform: WorkerPlatform) => Promise<boolean>;
+}
+
+function cloneHeartbeat(heartbeat: WorkerHeartbeat | null): WorkerHeartbeat | null {
+  return heartbeat
+    ? {
+        ...heartbeat,
+        observedAt: new Date(heartbeat.observedAt),
+      }
+    : null;
+}
+
+function cloneControlState(state: ControlState): ControlState {
+  return {
+    ...state,
+    failbackNotBefore: state.failbackNotBefore
+      ? new Date(state.failbackNotBefore)
+      : null,
+    localHeartbeat: cloneHeartbeat(state.localHeartbeat),
+    backupHeartbeat: cloneHeartbeat(state.backupHeartbeat),
+    updatedAt: new Date(state.updatedAt),
+  };
+}
+
 function cloneJob(job: JobRecord): JobRecord {
   return {
     ...job,
@@ -200,6 +270,76 @@ export function createMemoryStore(options: MemoryStoreOptions = {}): MemoryJobSt
     async get(id) {
       const job = jobs.get(id);
       return job ? cloneJob(job) : null;
+    },
+  };
+}
+
+export function createMemoryControlStore(options: { now?: () => Date } = {}): ControlStore {
+  const now = options.now ?? (() => new Date());
+  let state: ControlState = {
+    mode: 'local_primary',
+    activeOwner: 'local',
+    failoverReason: null,
+    failbackNotBefore: null,
+    localHeartbeat: null,
+    backupHeartbeat: null,
+    updatedAt: new Date(now()),
+  };
+
+  return {
+    async getState() {
+      return cloneControlState(state);
+    },
+
+    async updateOwnership(input) {
+      state = {
+        ...state,
+        mode: input.mode,
+        activeOwner: input.activeOwner,
+        failoverReason: input.failoverReason ?? null,
+        failbackNotBefore: input.failbackNotBefore ?? null,
+        updatedAt: new Date(now()),
+      };
+      return cloneControlState(state);
+    },
+
+    async recordHeartbeat(input) {
+      const heartbeat: WorkerHeartbeat = {
+        platform: input.platform,
+        workerId: input.workerId,
+        status: input.status ?? 'ok',
+        observedAt: input.observedAt ?? new Date(now()),
+      };
+      state = {
+        ...state,
+        localHeartbeat: input.platform === 'local' ? heartbeat : state.localHeartbeat,
+        backupHeartbeat: input.platform === 'backup' ? heartbeat : state.backupHeartbeat,
+        updatedAt: new Date(now()),
+      };
+      return cloneControlState(state);
+    },
+
+    async allowClaims(platform) {
+      return state.activeOwner === platform;
+    },
+  };
+}
+
+export function createGatedStore(
+  store: JobStore,
+  control: ControlStore,
+  platform: WorkerPlatform
+): JobStore {
+  return {
+    enqueue: (input) => store.enqueue(input),
+    complete: (id) => store.complete(id),
+    fail: (id, error) => store.fail(id, error),
+    get: (id) => store.get(id),
+    async claimNext(options) {
+      if (!(await control.allowClaims(platform))) {
+        return null;
+      }
+      return store.claimNext(options);
     },
   };
 }

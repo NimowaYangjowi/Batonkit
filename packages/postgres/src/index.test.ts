@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { createQueueMigrationSql, postgresStore } from './index.js';
+import {
+  createControlPlaneMigrationSql,
+  createQueueMigrationSql,
+  postgresStore,
+} from './index.js';
 
 describe('postgres queue package', () => {
   it('generates migration SQL for queue tables', () => {
@@ -9,6 +13,13 @@ describe('postgres queue package', () => {
     expect(sql).toContain('CREATE TABLE IF NOT EXISTS lfw_jobs');
     expect(sql).toContain('CREATE TABLE IF NOT EXISTS lfw_job_events');
     expect(sql).toContain('CREATE INDEX IF NOT EXISTS lfw_jobs_claim_idx');
+  });
+
+  it('generates migration SQL for control-plane tables', () => {
+    const sql = createControlPlaneMigrationSql();
+
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS lfw_control_state');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS lfw_worker_heartbeats');
   });
 
   it('enqueues jobs through a query client', async () => {
