@@ -69,4 +69,32 @@ describe('worker runtime', () => {
     expect(await worker.runOnce()).toBe('stopped');
     expect(store.list()[0]?.status).toBe('pending');
   });
+
+  it('processes a batch up to the configured concurrency', async () => {
+    const store = createMemoryStore();
+    const jobs = createJobs({ store });
+    await jobs.enqueue('generate-preview', { index: 1 });
+    await jobs.enqueue('generate-preview', { index: 2 });
+    let active = 0;
+    let maxActive = 0;
+
+    const worker = createWorker({
+      store,
+      workerId: 'local-worker',
+      concurrency: 2,
+      jobs: [
+        defineJob('generate-preview', async () => {
+          active += 1;
+          maxActive = Math.max(maxActive, active);
+          await new Promise((resolve) => setTimeout(resolve, 10));
+          active -= 1;
+        }),
+      ],
+    });
+
+    const result = await worker.runBatch();
+
+    expect(result.processed).toBe(2);
+    expect(maxActive).toBe(2);
+  });
 });

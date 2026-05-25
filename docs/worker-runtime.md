@@ -25,7 +25,7 @@ await worker.start();
 ## Behavior
 
 - `runOnce()` claims at most one job.
+- `runBatch()` claims up to the configured concurrency.
 - Successful handlers mark jobs as `completed`.
 - Failed handlers mark jobs as `failed` or `dead_letter`, depending on retry state.
 - `stop()` prevents new claims.
-

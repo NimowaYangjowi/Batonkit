@@ -26,6 +26,7 @@ export interface CreateWorkerOptions {
   store: JobStore;
   workerId: string;
   jobs: JobDefinition[];
+  concurrency?: number;
   leaseMs?: number;
   pollIntervalMs?: number;
   logger?: WorkerLogger;
@@ -33,10 +34,17 @@ export interface CreateWorkerOptions {
 
 export type RunOnceResult = 'processed' | 'idle' | 'stopped';
 
+export interface RunBatchResult {
+  processed: number;
+  idle: number;
+  stopped: number;
+}
+
 export interface WorkerRuntime {
   start: () => Promise<void>;
   stop: () => Promise<void>;
   runOnce: () => Promise<RunOnceResult>;
+  runBatch: () => Promise<RunBatchResult>;
 }
 
 const defaultLogger: WorkerLogger = {
@@ -58,6 +66,7 @@ export function defineJob<Payload = unknown>(
 export function createWorker(options: CreateWorkerOptions): WorkerRuntime {
   const jobsClient = createJobs({ store: options.store });
   const handlers = new Map(options.jobs.map((job) => [job.name, job]));
+  const concurrency = Math.max(1, options.concurrency ?? 1);
   const leaseMs = options.leaseMs ?? 30_000;
   const pollIntervalMs = options.pollIntervalMs ?? 1_000;
   const logger = options.logger ?? defaultLogger;
@@ -114,6 +123,18 @@ export function createWorker(options: CreateWorkerOptions): WorkerRuntime {
     return 'processed';
   }
 
+  async function runBatch(): Promise<RunBatchResult> {
+    const results = await Promise.all(
+      Array.from({ length: concurrency }, () => runOnce())
+    );
+
+    return {
+      processed: results.filter((result) => result === 'processed').length,
+      idle: results.filter((result) => result === 'idle').length,
+      stopped: results.filter((result) => result === 'stopped').length,
+    };
+  }
+
   async function start(): Promise<void> {
     if (loop) {
       return;
@@ -122,8 +143,8 @@ export function createWorker(options: CreateWorkerOptions): WorkerRuntime {
     isStopped = false;
     loop = (async () => {
       while (!isStopped) {
-        const result = await runOnce();
-        if (result === 'idle') {
+        const result = await runBatch();
+        if (result.processed === 0) {
           await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
         }
       }
@@ -140,5 +161,6 @@ export function createWorker(options: CreateWorkerOptions): WorkerRuntime {
     start,
     stop,
     runOnce,
+    runBatch,
   };
 }

@@ -78,8 +78,8 @@ git commit -m "feat: add worker runtime"
 
 - Regression risk: Medium. This phase introduces execution behavior, but tests cover handler registration, successful processing, unknown handlers, and stop behavior.
 - API clarity: Good for v1. `defineJob` and `createWorker` are small and generic.
-- Overengineering risk: Low. The runtime only supports a polling loop and `runOnce`; advanced concurrency and timeouts remain future work.
-- Test gaps: Handler timeout and multi-concurrency behavior are not implemented yet. The phase plan listed these, but the current v1 keeps runtime minimal; Phase 06 docs should describe this limitation.
+- Overengineering risk: Low. The runtime supports a polling loop, `runOnce`, and `runBatch` without adding a larger scheduler.
+- Test gaps: Handler timeout is not implemented yet. This remains a pre-release limitation.
 - Docs gaps: Basic runtime docs were added in `docs/worker-runtime.md`.
 - Performance/cost impact: Polling interval is configurable. Future control-plane work should avoid unnecessary polling when a worker is not the active owner.
 - Public-package ergonomics: Good. Runtime does not require Next.js and works with any `JobStore`.
@@ -89,7 +89,7 @@ git commit -m "feat: add worker runtime"
 
 - [x] Job definition API added
 - [x] Worker runtime loop added
-- [ ] Concurrency supported
+- [x] Concurrency supported
 - [x] Graceful shutdown supported
 - [x] Error handling covered by tests
 - [x] Tests pass
