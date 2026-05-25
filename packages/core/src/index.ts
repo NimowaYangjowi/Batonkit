@@ -343,3 +343,95 @@ export function createGatedStore(
     },
   };
 }
+
+export interface BackupProvider {
+  wake: () => Promise<void>;
+  park: () => Promise<void>;
+}
+
+export type FailoverMonitorEvent = 'down' | 'up';
+
+export type FailoverAction =
+  | 'failed_over'
+  | 'failback_cooldown'
+  | 'restored_local'
+  | 'noop';
+
+export interface ApplyFailoverEventInput {
+  control: ControlStore;
+  provider: BackupProvider;
+  event: FailoverMonitorEvent;
+  reason?: string;
+  observedAt?: Date;
+  failbackCooldownMs: number;
+}
+
+export interface ApplyFailoverEventResult {
+  action: FailoverAction;
+  state: ControlState;
+}
+
+export async function applyFailoverEvent(
+  input: ApplyFailoverEventInput
+): Promise<ApplyFailoverEventResult> {
+  const current = await input.control.getState();
+  const observedAt = input.observedAt ?? new Date();
+
+  if (current.mode === 'maintenance_override') {
+    return { action: 'noop', state: current };
+  }
+
+  if (input.event === 'down') {
+    if (current.activeOwner === 'backup') {
+      return { action: 'noop', state: current };
+    }
+
+    const nextState = await input.control.updateOwnership({
+      mode: 'backup_active',
+      activeOwner: 'backup',
+      failoverReason: input.reason ?? 'local_down',
+      failbackNotBefore: null,
+    });
+
+    try {
+      await input.provider.wake();
+    } catch (error) {
+      await input.control.updateOwnership({
+        mode: 'local_primary',
+        activeOwner: 'local',
+        failoverReason: null,
+        failbackNotBefore: null,
+      });
+      throw error;
+    }
+
+    return { action: 'failed_over', state: nextState };
+  }
+
+  if (current.activeOwner === 'local' && current.failbackNotBefore === null) {
+    return { action: 'noop', state: current };
+  }
+
+  if (!current.failbackNotBefore) {
+    const nextState = await input.control.updateOwnership({
+      mode: 'backup_active',
+      activeOwner: 'backup',
+      failoverReason: current.failoverReason,
+      failbackNotBefore: new Date(observedAt.getTime() + input.failbackCooldownMs),
+    });
+    return { action: 'failback_cooldown', state: nextState };
+  }
+
+  if (observedAt.getTime() < current.failbackNotBefore.getTime()) {
+    return { action: 'failback_cooldown', state: current };
+  }
+
+  const restored = await input.control.updateOwnership({
+    mode: 'local_primary',
+    activeOwner: 'local',
+    failoverReason: null,
+    failbackNotBefore: null,
+  });
+  await input.provider.park();
+  return { action: 'restored_local', state: restored };
+}

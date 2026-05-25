@@ -73,17 +73,23 @@ git commit -m "feat: add local first failover"
 
 ## Phase Review
 
-To be completed after implementation.
+- Regression risk: Medium. Ownership switching is high-impact, so tests cover failover, cooldown, and rollback on failed wake.
+- API clarity: Good. `BackupProvider` only exposes `wake` and `park`; Railway is a concrete adapter, not a core dependency.
+- Overengineering risk: Low. The monitor parser is intentionally generic and small.
+- Test gaps: No real Railway integration test yet. This should be added as a documented manual drill before public release.
+- Docs gaps: Basic failover docs were added in `docs/failover.md`.
+- Performance/cost impact: Positive. Backup workers can stay passive until `wake()` is called.
+- Public-package ergonomics: Good. Provider interface remains platform-neutral.
+- Later phase update: Phase 06 should document a safe failover drill and explain that Railway is optional.
 
 ## Completion Checklist
 
-- [ ] Failover decision engine added
-- [ ] Failback cooldown added
-- [ ] Provider interface added
-- [ ] Railway provider added
-- [ ] Monitor webhook helper added
-- [ ] Tests pass
-- [ ] Phase review completed
-- [ ] Phase committed
-- [ ] Later phase documents updated if needed
-
+- [x] Failover decision engine added
+- [x] Failback cooldown added
+- [x] Provider interface added
+- [x] Railway provider added
+- [x] Monitor webhook helper added
+- [x] Tests pass
+- [x] Phase review completed
+- [x] Phase committed
+- [x] Later phase documents updated if needed
