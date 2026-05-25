@@ -13,7 +13,15 @@
     "isolatedModules": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@local-first-worker/core": ["packages/core/src/index.ts"],
+      "@local-first-worker/postgres": ["packages/postgres/src/index.ts"],
+      "@local-first-worker/worker": ["packages/worker/src/index.ts"],
+      "@local-first-worker/next": ["packages/next/src/index.ts"],
+      "@local-first-worker/provider-railway": ["packages/provider-railway/src/index.ts"],
+      "@local-first-worker/monitor-webhook": ["packages/monitor-webhook/src/index.ts"]
+    }
   }
 }
-

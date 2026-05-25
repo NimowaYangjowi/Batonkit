@@ -87,17 +87,23 @@ git commit -m "feat: add postgres queue core"
 
 ## Phase Review
 
-To be completed after implementation.
+- Regression risk: Low to medium. The queue state machine is new and covered by focused tests for enqueue, claim, lease reclaim, retry, and dead-letter behavior.
+- API clarity: Good for v1. `createJobs`, `JobStore`, and `postgresStore` keep the public API generic and avoid app-specific job concepts.
+- Overengineering risk: Controlled. The in-memory store exists to test the store contract and worker behavior without requiring a live database; Postgres remains the durable v1 target.
+- Test gaps: No live Postgres integration test yet. This is acceptable for Phase 02 scaffolding but should be added before public release.
+- Docs gaps: Basic queue lifecycle docs were added in `docs/queue-core.md`; fuller public docs remain in Phase 06.
+- Performance/cost impact: Postgres queue uses `FOR UPDATE SKIP LOCKED` in the claim query. Later phases should keep polling intervals configurable to avoid unnecessary database load.
+- Public-package ergonomics: Good. Migration SQL is available as a helper and the query client interface does not force a specific Postgres driver.
+- Later phase update: Not required. The planned worker runtime can consume the `JobStore` contract as written.
 
 ## Completion Checklist
 
-- [ ] Queue tables added
-- [ ] Enqueue implemented
-- [ ] Claim/lease implemented
-- [ ] Complete/fail/retry implemented
-- [ ] Dead-letter behavior implemented
-- [ ] Tests pass
-- [ ] Phase review completed
-- [ ] Phase committed
-- [ ] Later phase documents updated if needed
-
+- [x] Queue tables added
+- [x] Enqueue implemented
+- [x] Claim/lease implemented
+- [x] Complete/fail/retry implemented
+- [x] Dead-letter behavior implemented
+- [x] Tests pass
+- [x] Phase review completed
+- [x] Phase committed
+- [x] Later phase documents updated if needed
