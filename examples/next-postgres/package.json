@@ -1,0 +1,13 @@
+{
+  "name": "local-first-worker-next-postgres-example",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo \"example scaffold only\"",
+    "test": "echo \"example scaffold only\"",
+    "typecheck": "echo \"example scaffold only\"",
+    "lint": "echo \"example scaffold only\""
+  }
+}
+
