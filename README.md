@@ -1,5 +1,7 @@
 # BatonKit
 
+![BatonKit local worker handing off a baton to a cloud worker](docs/assets/batonkit-hero.png)
+
 Postgres-first background jobs for small Next.js/Vercel teams that want to run work on local hardware first and wake a cloud backup worker only when needed.
 
 Plain language: your local machine normally does the slow background work. If it goes down, a cloud worker can take the baton.
