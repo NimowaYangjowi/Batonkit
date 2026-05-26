@@ -1,0 +1,19 @@
+# @batonkit/worker
+
+Worker runtime for BatonKit jobs.
+
+Plain language: this is the package that powers the actual worker process. It is the engine that sits on your local machine or on your cloud backup machine, looks at the queue, and runs the jobs you defined when it is that worker's turn to do the work.
+
+## Install
+
+```bash
+npm install @batonkit/core @batonkit/worker
+```
+
+## What It Includes
+
+- `defineJob(...)` for declaring job handlers
+- `createWorker(...)` for starting a worker process
+- support for worker IDs, logging, heartbeats, and single-run polling
+
+Use this with a BatonKit store from `@batonkit/core` or `@batonkit/postgres` depending on whether you are running a local demo or a shared Postgres-backed deployment.
