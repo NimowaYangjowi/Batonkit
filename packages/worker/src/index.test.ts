@@ -1,10 +1,19 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { createJobs, createMemoryStore } from '@batonkit/core';
+import {
+  createJobs,
+  createMemoryControlStore,
+  createMemoryStore,
+  type RecordHeartbeatInput,
+} from '@batonkit/core';
 
 import { createWorker, defineJob } from './index.js';
 
 describe('worker runtime', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('registers a job definition', () => {
     const job = defineJob('generate-preview', async () => undefined);
 
@@ -117,5 +126,96 @@ describe('worker runtime', () => {
 
     expect(result.processed).toBe(2);
     expect(maxActive).toBe(2);
+  });
+
+  it('records a heartbeat when the worker starts', async () => {
+    const control = createMemoryControlStore();
+    const worker = createWorker({
+      store: createMemoryStore(),
+      control,
+      platform: 'local',
+      workerId: 'local-worker',
+      jobs: [],
+      pollIntervalMs: 1,
+    });
+
+    await worker.start();
+    const state = await control.getState();
+    await worker.stop();
+
+    expect(state.localHeartbeat?.workerId).toBe('local-worker');
+    expect(state.localHeartbeat?.status).toBe('ok');
+  });
+
+  it('stops the heartbeat loop when the worker stops', async () => {
+    vi.useFakeTimers();
+    const baseControl = createMemoryControlStore();
+    const heartbeats: RecordHeartbeatInput[] = [];
+    const worker = createWorker({
+      store: createMemoryStore(),
+      control: {
+        ...baseControl,
+        recordHeartbeat: async (input) => {
+          heartbeats.push(input);
+          return baseControl.recordHeartbeat(input);
+        },
+      },
+      platform: 'local',
+      workerId: 'local-worker',
+      jobs: [],
+      heartbeatIntervalMs: 1_000,
+      pollIntervalMs: 1_000,
+    });
+
+    await worker.start();
+    await vi.advanceTimersByTimeAsync(1_000);
+    const stopPromise = worker.stop();
+    await vi.advanceTimersByTimeAsync(1_000);
+    await stopPromise;
+    const countAfterStop = heartbeats.length;
+
+    await vi.advanceTimersByTimeAsync(3_000);
+
+    expect(countAfterStop).toBeGreaterThanOrEqual(2);
+    expect(heartbeats).toContainEqual(
+      expect.objectContaining({
+        platform: 'local',
+        workerId: 'local-worker',
+        status: 'ok',
+      })
+    );
+    expect(heartbeats.length).toBe(countAfterStop);
+  });
+
+  it('logs heartbeat failures without blocking worker startup', async () => {
+    const errors: Array<Record<string, unknown> | undefined> = [];
+    const worker = createWorker({
+      store: createMemoryStore(),
+      control: {
+        ...createMemoryControlStore(),
+        recordHeartbeat: async () => {
+          throw new Error('heartbeat failed');
+        },
+      },
+      platform: 'local',
+      workerId: 'local-worker',
+      jobs: [],
+      pollIntervalMs: 1,
+      logger: {
+        info: () => undefined,
+        error: (_message, context) => {
+          errors.push(context);
+        },
+      },
+    });
+
+    await worker.start();
+    await worker.stop();
+
+    expect(errors[0]).toMatchObject({
+      workerId: 'local-worker',
+      platform: 'local',
+      error: 'heartbeat failed',
+    });
   });
 });

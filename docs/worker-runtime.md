@@ -33,3 +33,22 @@ await worker.start();
 - `stop()` prevents new claims.
 
 Plain language: if one worker is built to generate previews and another worker is built to send reports, the preview worker will leave report jobs alone instead of failing them.
+
+## Heartbeats
+
+Workers can report their health to a control store when you pass both `control` and `platform`:
+
+```ts
+const worker = createWorker({
+  store,
+  control,
+  platform: 'local',
+  workerId: 'office-mac-mini',
+  jobs: [generatePreview],
+  heartbeatIntervalMs: 30_000,
+});
+```
+
+Heartbeat setup is optional. When enabled, the worker records an `ok` heartbeat on `start()`, keeps refreshing it on the configured interval, and records `stopping` when `stop()` completes.
+
+Plain language: this is the status light for the worker. The control plane can show whether the local or backup worker has checked in recently.

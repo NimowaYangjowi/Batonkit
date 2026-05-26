@@ -19,3 +19,5 @@ npm install @batonkit/core @batonkit/worker
 Use this with a BatonKit store from `@batonkit/core` or `@batonkit/postgres` depending on whether you are running a local demo or a shared Postgres-backed deployment.
 
 Workers only claim the job names you register in their `jobs` list. Plain language: a preview worker leaves report jobs in the queue for the report worker instead of marking them failed.
+
+Pass `control`, `platform`, and `heartbeatIntervalMs` to report worker heartbeats. Plain language: this lets the shared baton state show that the local or backup worker has checked in recently.

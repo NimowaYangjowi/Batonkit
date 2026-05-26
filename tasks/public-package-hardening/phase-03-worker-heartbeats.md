@@ -84,16 +84,23 @@ git commit -m "feat: add worker heartbeat support"
 
 ## Phase Review
 
-- Pending. Complete after implementation.
+- Regression risk: medium. Worker startup and shutdown now have optional heartbeat side effects, but the behavior is disabled unless both `control` and `platform` are provided.
+- API clarity: improved. Heartbeat setup is part of `createWorker(...)` options and requires the same worker-facing concepts users already see: control store, platform, worker ID, and interval.
+- Overengineering: avoided. The worker runtime uses the existing `ControlStore.recordHeartbeat(...)` contract instead of adding a separate heartbeat service.
+- Test gaps: acceptable for this phase. Tests cover heartbeat on start, timer cleanup on stop, and heartbeat failure logging without blocking startup.
+- Docs gaps: addressed in `docs/worker-runtime.md`, `docs/api-reference.md`, and `packages/worker/README.md`.
+- Performance/cost impact: low and configurable. Heartbeats are optional and default to a 30 second interval when enabled.
+- Security impact: neutral. No new route or secret surface was added; workers write through the existing control store.
+- Public-package ergonomics: improved because the worker package now matches its heartbeat documentation.
+- Later phase update: not required. Phase 04 can still handle API parity and control read security independently.
 
 ## Completion Checklist
 
-- [ ] Failing heartbeat tests written first
-- [ ] Heartbeat behavior implemented or docs corrected
-- [ ] Timer shutdown covered by tests
-- [ ] Docs updated
-- [ ] Verification commands pass
-- [ ] Phase review completed
-- [ ] Phase committed
-- [ ] Later phase documents updated if needed
-
+- [x] Failing heartbeat tests written first
+- [x] Heartbeat behavior implemented or docs corrected
+- [x] Timer shutdown covered by tests
+- [x] Docs updated
+- [x] Verification commands pass
+- [x] Phase review completed
+- [x] Phase committed
+- [x] Later phase documents updated if needed

@@ -1,4 +1,10 @@
-import type { JobRecord, JobStore } from '@batonkit/core';
+import type {
+  ControlStore,
+  JobRecord,
+  JobStore,
+  WorkerHealthStatus,
+  WorkerPlatform,
+} from '@batonkit/core';
 import { createJobs } from '@batonkit/core';
 
 export interface WorkerLogger {
@@ -26,9 +32,13 @@ export interface CreateWorkerOptions {
   store: JobStore;
   workerId: string;
   jobs: JobDefinition[];
+  control?: ControlStore;
+  platform?: WorkerPlatform;
   concurrency?: number;
   leaseMs?: number;
   pollIntervalMs?: number;
+  heartbeatIntervalMs?: number;
+  heartbeatStatus?: WorkerHealthStatus;
   logger?: WorkerLogger;
 }
 
@@ -69,9 +79,38 @@ export function createWorker(options: CreateWorkerOptions): WorkerRuntime {
   const concurrency = Math.max(1, options.concurrency ?? 1);
   const leaseMs = options.leaseMs ?? 30_000;
   const pollIntervalMs = options.pollIntervalMs ?? 1_000;
+  const heartbeatIntervalMs = Math.max(1, options.heartbeatIntervalMs ?? 30_000);
   const logger = options.logger ?? defaultLogger;
+  const heartbeatEnabled = Boolean(options.control && options.platform);
   let isStopped = false;
   let loop: Promise<void> | null = null;
+  let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+
+  if ((options.control && !options.platform) || (!options.control && options.platform)) {
+    throw new Error('Worker heartbeat requires both control and platform options');
+  }
+
+  async function recordHeartbeat(
+    status: WorkerHealthStatus = options.heartbeatStatus ?? 'ok'
+  ): Promise<void> {
+    if (!heartbeatEnabled || !options.control || !options.platform) {
+      return;
+    }
+
+    try {
+      await options.control.recordHeartbeat({
+        platform: options.platform,
+        workerId: options.workerId,
+        status,
+      });
+    } catch (error) {
+      logger.error('Worker heartbeat failed', {
+        workerId: options.workerId,
+        platform: options.platform,
+        error: errorMessage(error),
+      });
+    }
+  }
 
   async function runOnce(): Promise<RunOnceResult> {
     if (isStopped) {
@@ -135,6 +174,12 @@ export function createWorker(options: CreateWorkerOptions): WorkerRuntime {
     }
 
     isStopped = false;
+    await recordHeartbeat();
+    if (heartbeatEnabled) {
+      heartbeatTimer = setInterval(() => {
+        void recordHeartbeat();
+      }, heartbeatIntervalMs);
+    }
     loop = (async () => {
       while (!isStopped) {
         const result = await runBatch();
@@ -146,9 +191,17 @@ export function createWorker(options: CreateWorkerOptions): WorkerRuntime {
   }
 
   async function stop(): Promise<void> {
+    const hadLoop = loop !== null;
     isStopped = true;
+    if (heartbeatTimer) {
+      clearInterval(heartbeatTimer);
+      heartbeatTimer = null;
+    }
     await loop;
     loop = null;
+    if (hadLoop) {
+      await recordHeartbeat('stopping');
+    }
   }
 
   return {

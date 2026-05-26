@@ -69,6 +69,13 @@ Creates a worker runtime with:
 
 Workers claim only the job names registered in `options.jobs`.
 
+Optional heartbeat fields:
+
+- `control`: control store that receives worker heartbeats
+- `platform`: `local` or `backup`
+- `heartbeatIntervalMs`: heartbeat refresh interval, default `30000`
+- `heartbeatStatus`: health status to report, default `ok`
+
 ## `@batonkit/next`
 
 ### `createControlPlaneHandlers({ control, secret })`
