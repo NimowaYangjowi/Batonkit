@@ -199,8 +199,12 @@ export function createMemoryStore(options: MemoryStoreOptions = {}): MemoryJobSt
 
     async enqueue(input) {
       const timestamp = currentTime();
+      const jobId = input.options?.id ?? createJobId();
+      if (jobs.has(jobId)) {
+        throw new Error(`Job already exists: ${jobId}`);
+      }
       const job: JobRecord = {
-        id: input.options?.id ?? createJobId(),
+        id: jobId,
         name: input.name,
         payload: input.payload,
         status: 'pending',

@@ -14,6 +14,24 @@ describe('job queue core', () => {
     expect(job.attempts).toBe(0);
   });
 
+  it('rejects duplicate caller-provided job ids instead of overwriting the original job', async () => {
+    const jobs = createJobs({ store: createMemoryStore() });
+
+    await jobs.enqueue(
+      'generate-preview',
+      { fileId: 'file_123' },
+      { id: 'job_file_123_preview' }
+    );
+
+    await expect(
+      jobs.enqueue(
+        'generate-preview',
+        { fileId: 'file_999' },
+        { id: 'job_file_123_preview' }
+      )
+    ).rejects.toThrow('Job already exists: job_file_123_preview');
+  });
+
   it('lets only one worker claim a pending job lease', async () => {
     const jobs = createJobs({ store: createMemoryStore() });
     await jobs.enqueue('generate-preview', { fileId: 'file_123' });

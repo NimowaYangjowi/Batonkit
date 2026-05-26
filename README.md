@@ -82,6 +82,10 @@ Enqueue a job from your app:
 await jobs.enqueue('generate-preview', { fileId: 'file_123' });
 ```
 
+If you provide your own job ID for idempotency or tracing, BatonKit preserves that ID and rejects later duplicate enqueues that reuse it.
+
+Plain language: if your app already named one background ticket `job_file_123_preview`, BatonKit will not quietly let a second different ticket steal that same name.
+
 Add a Next.js control route:
 
 ```ts

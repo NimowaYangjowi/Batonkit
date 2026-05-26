@@ -39,7 +39,11 @@ await jobs.enqueue(
 
 Both the memory store and the Postgres store preserve caller-provided job ids.
 
+If you reuse the same caller-provided job id, BatonKit rejects the duplicate enqueue instead of silently replacing the earlier job.
+
 Plain language: if your app already has a stable name for a piece of background work, BatonKit can use that same name instead of inventing a new one.
+
+Plain language: if you already stuck the name tag `job_file_123_preview` onto one ticket, BatonKit will not quietly rip it off and stick it onto a different ticket later.
 
 ## Migration
 

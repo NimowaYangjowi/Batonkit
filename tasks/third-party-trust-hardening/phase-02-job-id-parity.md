@@ -66,15 +66,23 @@ git commit -m "fix: align duplicate job id behavior"
 
 ## Phase Review
 
-- Pending implementation.
+- Regression risk: low. Fresh enqueues still behave the same, and only duplicate caller-provided IDs now fail fast in the memory store to match the real Postgres queue.
+- API clarity: improved. The public contract now clearly says that caller-provided IDs are preserved and duplicate reuse is rejected.
+- Overengineering: avoided. This phase does not add a separate idempotency API or cross-store abstraction; it aligns the test/demo store with the existing durable store behavior.
+- Test gaps: acceptable for this phase. The new regression test covers duplicate-ID rejection in the memory store, while existing tests still cover enqueue basics, leases, retries, and dead-letter behavior.
+- Docs gaps: addressed in `README.md`, `docs/queue-core.md`, `docs/api-reference.md`, and `packages/core/README.md`.
+- Performance/cost impact: negligible. The new guard is a single map lookup in the memory store enqueue path.
+- Security impact: neutral. No new endpoint or secret handling was introduced.
+- Public-package ergonomics: improved because local demos and tests now teach the same duplicate-ID rule that real Postgres deployments enforce.
+- Later phase update: not required. The remaining phases still fit the current architecture.
 
 ## Completion Checklist
 
-- [ ] Failing regression tests written first
-- [ ] Memory and Postgres duplicate-ID behavior aligned
-- [ ] Fresh enqueue behavior preserved
-- [ ] Docs updated if public behavior changes
-- [ ] Verification commands pass
-- [ ] Phase review completed
+- [x] Failing regression tests written first
+- [x] Memory and Postgres duplicate-ID behavior aligned
+- [x] Fresh enqueue behavior preserved
+- [x] Docs updated if public behavior changes
+- [x] Verification commands pass
+- [x] Phase review completed
 - [ ] Phase committed
-- [ ] Later phase documents updated if needed
+- [x] Later phase documents updated if needed

@@ -20,6 +20,8 @@ Methods:
 - `runAt`: optional time when the job becomes claimable
 - `maxAttempts`: optional retry limit
 
+If you pass `id`, both the memory store and Postgres store reject duplicate enqueues that reuse the same caller-provided job id.
+
 ### `createMemoryStore()`
 
 In-memory `JobStore` for tests and examples.

@@ -18,3 +18,5 @@ npm install @batonkit/core
 - `createGatedStore(...)` for enforcing local-versus-backup ownership
 
 Use this together with `@batonkit/postgres` when you want a real shared Postgres-backed queue instead of an in-memory demo setup.
+
+If you pass your own job ID through `enqueue(..., { id })`, BatonKit preserves that ID and rejects later duplicate enqueues that try to reuse it. Plain language: you can bring your own tracking ticket number, but you cannot silently reuse it for a different ticket later.
