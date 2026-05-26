@@ -35,10 +35,30 @@ describe('worker runtime', () => {
     expect(job?.status).toBe('completed');
   });
 
-  it('fails unknown jobs clearly', async () => {
+  it('does not claim jobs outside its registered names', async () => {
     const store = createMemoryStore();
     const jobs = createJobs({ store });
-    await jobs.enqueue('missing-handler', {});
+    await jobs.enqueue('send-report', { reportId: 'report_123' });
+
+    const worker = createWorker({
+      store,
+      workerId: 'local-worker',
+      jobs: [defineJob('generate-preview', async () => undefined)],
+    });
+
+    const result = await worker.runOnce();
+    const [job] = store.list();
+
+    expect(result).toBe('idle');
+    expect(job?.status).toBe('pending');
+    expect(job?.attempts).toBe(0);
+    expect(job?.lastError).toBeNull();
+  });
+
+  it('does not sweep the queue when no handlers are registered', async () => {
+    const store = createMemoryStore();
+    const jobs = createJobs({ store });
+    await jobs.enqueue('send-report', { reportId: 'report_123' });
 
     const worker = createWorker({
       store,
@@ -46,11 +66,12 @@ describe('worker runtime', () => {
       jobs: [],
     });
 
-    await worker.runOnce();
+    const result = await worker.runOnce();
     const [job] = store.list();
 
-    expect(job?.status).toBe('failed');
-    expect(job?.lastError).toContain('No handler registered');
+    expect(result).toBe('idle');
+    expect(job?.status).toBe('pending');
+    expect(job?.attempts).toBe(0);
   });
 
   it('stops without claiming more work', async () => {

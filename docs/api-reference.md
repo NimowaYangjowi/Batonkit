@@ -61,6 +61,9 @@ Creates a worker runtime with:
 - `start()`
 - `stop()`
 - `runOnce()`
+- `runBatch()`
+
+Workers claim only the job names registered in `options.jobs`.
 
 ## `@batonkit/next`
 

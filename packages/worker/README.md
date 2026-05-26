@@ -17,3 +17,5 @@ npm install @batonkit/core @batonkit/worker
 - support for worker IDs, logging, heartbeats, and single-run polling
 
 Use this with a BatonKit store from `@batonkit/core` or `@batonkit/postgres` depending on whether you are running a local demo or a shared Postgres-backed deployment.
+
+Workers only claim the job names you register in their `jobs` list. Plain language: a preview worker leaves report jobs in the queue for the report worker instead of marking them failed.

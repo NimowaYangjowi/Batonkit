@@ -26,6 +26,10 @@ await worker.start();
 
 - `runOnce()` claims at most one job.
 - `runBatch()` claims up to the configured concurrency.
+- Workers only claim job names registered in their `jobs` list.
+- Jobs with unregistered names stay in the queue for another worker that knows that job name.
 - Successful handlers mark jobs as `completed`.
 - Failed handlers mark jobs as `failed` or `dead_letter`, depending on retry state.
 - `stop()` prevents new claims.
+
+Plain language: if one worker is built to generate previews and another worker is built to send reports, the preview worker will leave report jobs alone instead of failing them.

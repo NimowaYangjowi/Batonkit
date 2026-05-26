@@ -78,6 +78,10 @@ export function createWorker(options: CreateWorkerOptions): WorkerRuntime {
       return 'stopped';
     }
 
+    if (handlers.size === 0) {
+      return 'idle';
+    }
+
     const job = await jobsClient.claimNext({
       workerId: options.workerId,
       leaseMs,
@@ -85,17 +89,7 @@ export function createWorker(options: CreateWorkerOptions): WorkerRuntime {
     });
 
     if (!job) {
-      const unknownJob = await jobsClient.claimNext({
-        workerId: options.workerId,
-        leaseMs,
-      });
-
-      if (!unknownJob) {
-        return 'idle';
-      }
-
-      await jobsClient.fail(unknownJob.id, `No handler registered for job "${unknownJob.name}"`);
-      return 'processed';
+      return 'idle';
     }
 
     const definition = handlers.get(job.name);

@@ -67,16 +67,23 @@ git commit -m "fix: prevent workers from claiming unknown jobs"
 
 ## Phase Review
 
-- Pending. Complete after implementation.
+- Regression risk: low. The worker now narrows normal claims to registered job names only, which removes the unsafe queue-sweeping path while preserving matching-job processing.
+- API clarity: improved. Docs now state that `createWorker(...)` processes only the names in `jobs`, which helps teams run multiple specialized workers against one queue.
+- Overengineering: avoided. No new mode or cleanup API was added; normal workers simply stop claiming work they cannot handle.
+- Test gaps: acceptable for this phase. Regression tests cover both a mismatched job name and an empty handler registry, while existing tests still cover successful processing, failure retries, stop behavior, and concurrency.
+- Docs gaps: addressed in `docs/worker-runtime.md`, `docs/api-reference.md`, and `packages/worker/README.md`.
+- Performance/cost impact: positive. Workers avoid a second broad claim query when no matching work exists.
+- Security impact: neutral. No new endpoint, secret, or data exposure was introduced.
+- Public-package ergonomics: improved because mixed worker deployments no longer risk failing each other's jobs by default.
+- Later phase update: not required. The remaining hardening phases still apply as written.
 
 ## Completion Checklist
 
-- [ ] Failing regression tests written first
-- [ ] Normal worker polling ignores unregistered job names
-- [ ] Existing matching-job behavior preserved
-- [ ] Docs updated if public behavior changes
-- [ ] Verification commands pass
-- [ ] Phase review completed
-- [ ] Phase committed
-- [ ] Later phase documents updated if needed
-
+- [x] Failing regression tests written first
+- [x] Normal worker polling ignores unregistered job names
+- [x] Existing matching-job behavior preserved
+- [x] Docs updated if public behavior changes
+- [x] Verification commands pass
+- [x] Phase review completed
+- [x] Phase committed
+- [x] Later phase documents updated if needed
