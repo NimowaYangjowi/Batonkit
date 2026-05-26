@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
+    "types": ["node", "vitest/globals"]
+  },
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/postgres" },
+    { "path": "../../packages/provider-railway" },
+    { "path": "../../packages/worker" }
+  ],
+  "include": ["src/**/*.ts"]
+}

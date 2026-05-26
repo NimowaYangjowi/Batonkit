@@ -58,6 +58,12 @@ For failover behavior changes, also run:
 npm run drill:failover
 ```
 
+For Railway live drill harness changes, also run:
+
+```bash
+npm run drill:railway-live
+```
+
 ## Implementation Rules
 
 - Write tests before behavior changes.
@@ -77,4 +83,3 @@ Do not publish to npm until:
 - failover drill passes
 - package names and scope are confirmed
 - README has a copy-pasteable tutorial
-

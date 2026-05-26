@@ -10,12 +10,19 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "tsc -b packages/*",
+    "build": "tsc -b packages/* examples/railway-live-drill",
     "typecheck": "tsc -p tsconfig.typecheck.json --noEmit",
     "test": "vitest run",
     "test:postgres": "node scripts/run-postgres-integration.mjs",
     "test:pack": "node scripts/pack-consumer-smoke.mjs",
     "drill:failover": "node scripts/failover-drill.mjs",
+    "drill:railway-live": "node examples/railway-live-drill/dist/drill.js run-local",
+    "drill:railway-live:enqueue": "node examples/railway-live-drill/dist/drill.js enqueue",
+    "drill:railway-live:down": "node examples/railway-live-drill/dist/drill.js failover down",
+    "drill:railway-live:up": "node examples/railway-live-drill/dist/drill.js failover up",
+    "server:railway-live": "BATONKIT_PLATFORM=backup node examples/railway-live-drill/dist/server.js",
+    "worker:railway-live:local": "BATONKIT_PLATFORM=local node examples/railway-live-drill/dist/worker.js",
+    "worker:railway-live:backup": "BATONKIT_PLATFORM=backup node examples/railway-live-drill/dist/worker.js",
     "lint": "eslint ."
   },
   "devDependencies": {

@@ -30,6 +30,6 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['packages/*/src/**/*.test.ts'],
+    include: ['packages/*/src/**/*.test.ts', 'examples/railway-live-drill/src/**/*.test.ts'],
   },
 });

@@ -1,0 +1,24 @@
+{
+  "name": "batonkit-railway-live-drill-example",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "server": "node dist/server.js",
+    "worker": "node dist/worker.js",
+    "drill": "node dist/drill.js run-local",
+    "enqueue": "node dist/drill.js enqueue"
+  },
+  "dependencies": {
+    "@batonkit/core": "0.0.0",
+    "@batonkit/postgres": "0.0.0",
+    "@batonkit/provider-railway": "0.0.0",
+    "@batonkit/worker": "0.0.0",
+    "pg": "^8.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.3"
+  }
+}

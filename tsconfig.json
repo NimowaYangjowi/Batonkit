@@ -6,7 +6,7 @@
     { "path": "./packages/worker" },
     { "path": "./packages/next" },
     { "path": "./packages/provider-railway" },
-    { "path": "./packages/monitor-webhook" }
+    { "path": "./packages/monitor-webhook" },
+    { "path": "./examples/railway-live-drill" }
   ]
 }
-

@@ -16,7 +16,12 @@ Use semantic versioning once public releases begin:
 npm run build
 npm run typecheck
 npm run test
+npm run test:postgres
+npm run test:pack
+npm run drill:failover
+npm run drill:railway-live
 npm run lint
+npm audit --omit=dev
 ```
 
 ## Publishing
@@ -28,4 +33,4 @@ Do not publish until:
 - live Postgres integration tests exist
 - public API names have been reviewed
 - failover drill docs have been tested against a real backup provider
-
+- `docs/railway-live-drill.md` has a completed real Railway proof run, not only local harness output
