@@ -27,6 +27,20 @@ await jobs.enqueue('generate-preview', { fileId: 'file_123' });
 
 The job name should describe a product task in generic terms. For example, `generate-preview` can mean creating an upload preview in one app and creating a PDF thumbnail in another.
 
+You may pass an explicit job id when you need idempotency or outside-system tracing:
+
+```ts
+await jobs.enqueue(
+  'generate-preview',
+  { fileId: 'file_123' },
+  { id: 'job_file_123_preview' }
+);
+```
+
+Both the memory store and the Postgres store preserve caller-provided job ids.
+
+Plain language: if your app already has a stable name for a piece of background work, BatonKit can use that same name instead of inventing a new one.
+
 ## Migration
 
 `createQueueMigrationSql()` returns the initial SQL for:
@@ -35,4 +49,3 @@ The job name should describe a product task in generic terms. For example, `gene
 - `lfw_job_events`
 
 Run this SQL before enqueueing jobs.
-

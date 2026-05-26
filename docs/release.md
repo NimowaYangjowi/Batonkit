@@ -31,7 +31,11 @@ Packages should be published under the `@batonkit` scope.
 
 Do not publish until:
 
-- live Postgres integration tests exist
+- live Postgres integration tests pass
+- `npm pack` consumer smoke tests pass
+- failover drill passes
 - public API names have been reviewed
 - failover drill docs have been tested against a real backup provider
 - `docs/railway-live-drill.md` has a completed real Railway proof run, not only local harness output
+- README includes the required production wiring for migrations, worker heartbeats, monitor webhooks, and failback reconciliation
+- control-plane route security defaults have been reviewed for the release target

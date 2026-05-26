@@ -108,8 +108,11 @@ const generatePreview = defineJob('generate-preview', async (payload, ctx) => {
 
 const localWorker = createWorker({
   store: localStore,
+  control,
+  platform: 'local',
   workerId: 'office-mac-mini',
   jobs: [generatePreview],
+  heartbeatIntervalMs: 30_000,
 });
 
 await localWorker.start();
@@ -120,8 +123,11 @@ Run a backup worker in the cloud with the same job definitions:
 ```ts
 const backupWorker = createWorker({
   store: backupStore,
+  control,
+  platform: 'backup',
   workerId: 'railway-backup-worker',
   jobs: [generatePreview],
+  heartbeatIntervalMs: 30_000,
 });
 
 await backupWorker.start();
@@ -137,7 +143,10 @@ The backup worker will stay passive while local ownership is active because `bac
 4. A monitor reports local worker `down`.
 5. The control plane switches ownership to `backup`.
 6. A provider adapter wakes the backup worker.
-7. When local is healthy again, failback waits for a cooldown before returning ownership to `local`.
+7. When local is healthy again, failback waits for a cooldown.
+8. A scheduled call to `reconcileFailback(...)` returns ownership to `local` after the cooldown.
+
+Plain language: the monitor only needs to report "local is back" once. After that, run a small periodic check so BatonKit can hand the baton home when the wait is over.
 
 ## Monitoring Dependency
 
@@ -152,6 +161,17 @@ The built-in `@batonkit/monitor-webhook` helper accepts generic payloads with ei
 - `event: ...` with the same values
 
 If your monitoring tool sends a different shape, add a tiny adapter in your route handler before calling BatonKit's failover logic.
+
+## Known Preview Limitations
+
+- BatonKit is still a developer preview, not a production-stable queue system.
+- You must run the migration SQL yourself before enqueueing jobs.
+- You must wire the monitor webhook and call `applyFailoverEvent(...)` from your app.
+- You must run a periodic `reconcileFailback(...)` call if you use non-zero failback cooldowns.
+- The Next.js control route requires `Authorization: Bearer <secret>` for `GET` and `POST` unless you explicitly pass `publicRead: true`.
+- Workers only claim job names registered in their `jobs` list, so run one worker process per set of job handlers you want that process to own.
+
+Plain language: the package provides the queue, worker, baton state, and failover primitives. Your app still owns the wiring between monitor, route, worker processes, and deployment.
 
 ## Database Tables
 

@@ -38,4 +38,8 @@ export const { GET, POST } = createControlPlaneHandlers({
 });
 ```
 
-`POST` requires `Authorization: Bearer <secret>`.
+`GET` and `POST` require `Authorization: Bearer <secret>` by default.
+
+Pass `publicRead: true` only when it is safe for anyone with the route URL to see ownership and heartbeat state.
+
+Plain language: the status door is locked by default because it can reveal which worker is active and which worker checked in recently.
