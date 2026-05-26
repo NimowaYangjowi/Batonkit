@@ -79,17 +79,24 @@ git commit -m "feat: add failback reconciliation"
 
 ## Phase Review
 
-- Pending. Complete after implementation.
+- Regression risk: low to medium. The phase adds a new reconciliation helper without changing existing `applyFailoverEvent(...)` behavior, so existing monitor webhook flows keep working.
+- API clarity: improved. `applyFailoverEvent(...)` now owns monitor events, while `reconcileFailback(...)` owns the scheduled "is cooldown done yet?" check.
+- Overengineering: avoided. The implementation adds one small helper instead of a scheduler, route framework, or blocking request behavior.
+- Test gaps: acceptable for this phase. Tests cover restoration after cooldown, no-op before cooldown, provider parking, and maintenance override.
+- Docs gaps: addressed in `docs/failover.md` and `docs/api-reference.md`.
+- Performance/cost impact: neutral. Reconciliation only reads control state and updates ownership when cooldown has elapsed; callers choose their own schedule.
+- Security impact: neutral. No new HTTP route or secret surface was introduced.
+- Public-package ergonomics: improved because users can rely on one monitor recovery event plus a periodic reconciliation loop.
+- Later phase update: not required. Phase 03 can still add worker heartbeat support independently.
 
 ## Completion Checklist
 
-- [ ] Failing reconciliation tests written first
-- [ ] Failback reconciliation implemented
-- [ ] Provider parking covered by tests
-- [ ] Maintenance override behavior preserved
-- [ ] Failover docs updated
-- [ ] Verification commands pass
-- [ ] Phase review completed
-- [ ] Phase committed
-- [ ] Later phase documents updated if needed
-
+- [x] Failing reconciliation tests written first
+- [x] Failback reconciliation implemented
+- [x] Provider parking covered by tests
+- [x] Maintenance override behavior preserved
+- [x] Failover docs updated
+- [x] Verification commands pass
+- [x] Phase review completed
+- [x] Phase committed
+- [x] Later phase documents updated if needed

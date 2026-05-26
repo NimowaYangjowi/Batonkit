@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyFailoverEvent,
   createMemoryControlStore,
+  reconcileFailback,
   type BackupProvider,
 } from './index.js';
 
@@ -108,5 +109,106 @@ describe('failover decisions', () => {
       })
     ).rejects.toThrow('wake failed');
     expect((await control.getState()).activeOwner).toBe('local');
+  });
+
+  it('restores local ownership when failback reconciliation runs after cooldown', async () => {
+    const control = createMemoryControlStore();
+    const calls: string[] = [];
+    const provider: BackupProvider = {
+      wake: async () => undefined,
+      park: async () => {
+        calls.push('park');
+      },
+    };
+
+    await applyFailoverEvent({
+      control,
+      provider,
+      event: 'down',
+      failbackCooldownMs: 300_000,
+      observedAt: new Date('2026-05-25T00:00:00.000Z'),
+    });
+    await applyFailoverEvent({
+      control,
+      provider,
+      event: 'up',
+      failbackCooldownMs: 300_000,
+      observedAt: new Date('2026-05-25T00:01:00.000Z'),
+    });
+
+    const result = await reconcileFailback({
+      control,
+      provider,
+      observedAt: new Date('2026-05-25T00:06:01.000Z'),
+    });
+
+    expect(result.action).toBe('restored_local');
+    expect((await control.getState()).activeOwner).toBe('local');
+    expect(calls).toEqual(['park']);
+  });
+
+  it('does not restore local ownership before failback cooldown expires', async () => {
+    const control = createMemoryControlStore();
+    const calls: string[] = [];
+    const provider: BackupProvider = {
+      wake: async () => undefined,
+      park: async () => {
+        calls.push('park');
+      },
+    };
+
+    await applyFailoverEvent({
+      control,
+      provider,
+      event: 'down',
+      failbackCooldownMs: 300_000,
+      observedAt: new Date('2026-05-25T00:00:00.000Z'),
+    });
+    await applyFailoverEvent({
+      control,
+      provider,
+      event: 'up',
+      failbackCooldownMs: 300_000,
+      observedAt: new Date('2026-05-25T00:01:00.000Z'),
+    });
+
+    const result = await reconcileFailback({
+      control,
+      provider,
+      observedAt: new Date('2026-05-25T00:05:59.000Z'),
+    });
+
+    expect(result.action).toBe('failback_cooldown');
+    expect((await control.getState()).activeOwner).toBe('backup');
+    expect(calls).toEqual([]);
+  });
+
+  it('does not reconcile failback while maintenance override is active', async () => {
+    const control = createMemoryControlStore();
+    const calls: string[] = [];
+    const provider: BackupProvider = {
+      wake: async () => undefined,
+      park: async () => {
+        calls.push('park');
+      },
+    };
+
+    await control.updateOwnership({
+      mode: 'maintenance_override',
+      activeOwner: 'backup',
+      failoverReason: 'operator_override',
+      failbackNotBefore: new Date('2026-05-25T00:00:00.000Z'),
+    });
+
+    const result = await reconcileFailback({
+      control,
+      provider,
+      observedAt: new Date('2026-05-25T00:10:00.000Z'),
+    });
+
+    expect(result.action).toBe('noop');
+    expect((await control.getState()).mode).toBe('maintenance_override');
+    expect((await control.getState()).activeOwner).toBe('backup');
+    expect(calls).toEqual([]);
   });
 });

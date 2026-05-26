@@ -30,6 +30,10 @@ Wraps a job store so only the active owner can claim jobs.
 
 Applies a monitor `down` or `up` event to the control plane.
 
+### `reconcileFailback(input)`
+
+Checks whether a pending failback cooldown has elapsed and restores local ownership when it is safe to do so.
+
 ## `@batonkit/postgres`
 
 ### `createQueueMigrationSql()`

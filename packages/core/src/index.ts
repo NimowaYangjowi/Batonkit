@@ -371,6 +371,12 @@ export interface ApplyFailoverEventResult {
   state: ControlState;
 }
 
+export interface ReconcileFailbackInput {
+  control: ControlStore;
+  provider: BackupProvider;
+  observedAt?: Date;
+}
+
 export async function applyFailoverEvent(
   input: ApplyFailoverEventInput
 ): Promise<ApplyFailoverEventResult> {
@@ -431,6 +437,34 @@ export async function applyFailoverEvent(
       failbackNotBefore: new Date(observedAt.getTime() + input.failbackCooldownMs),
     });
     return { action: 'failback_cooldown', state: nextState };
+  }
+
+  if (observedAt.getTime() < current.failbackNotBefore.getTime()) {
+    return { action: 'failback_cooldown', state: current };
+  }
+
+  const restored = await input.control.updateOwnership({
+    mode: 'local_primary',
+    activeOwner: 'local',
+    failoverReason: null,
+    failbackNotBefore: null,
+  });
+  await input.provider.park();
+  return { action: 'restored_local', state: restored };
+}
+
+export async function reconcileFailback(
+  input: ReconcileFailbackInput
+): Promise<ApplyFailoverEventResult> {
+  const current = await input.control.getState();
+  const observedAt = input.observedAt ?? new Date();
+
+  if (current.mode === 'maintenance_override') {
+    return { action: 'noop', state: current };
+  }
+
+  if (current.activeOwner === 'local' || !current.failbackNotBefore) {
+    return { action: 'noop', state: current };
   }
 
   if (observedAt.getTime() < current.failbackNotBefore.getTime()) {

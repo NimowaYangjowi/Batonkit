@@ -12,7 +12,10 @@ Plain language: the local machine normally holds the baton. If it disappears, th
 4. Backup worker can claim jobs.
 5. Monitor reports local worker `up`.
 6. Failback cooldown starts.
-7. After cooldown, ownership returns to `local` and the provider parks the backup worker.
+7. A scheduled reconciliation call checks whether the cooldown has elapsed.
+8. After cooldown, ownership returns to `local` and the provider parks the backup worker.
+
+Plain language: the monitor only needs to say "local is back" once. After that, your app or worker should periodically call `reconcileFailback(...)`, like checking whether a kitchen timer has finished.
 
 ## Provider Interface
 
@@ -51,13 +54,20 @@ For example, a small Next.js route can:
 
 Plain language: think of BatonKit as expecting a simple traffic-light instruction. Your monitor can speak any language as long as your route translates it into red or green.
 
+## Failback Reconciliation
+
+`applyFailoverEvent({ event: 'up', ... })` starts the failback cooldown when local is healthy again. `reconcileFailback(...)` should then run periodically from a cron, route, or worker-side loop. It restores local ownership only after `failbackNotBefore` has passed.
+
+Plain language: the `up` event starts the waiting period. The reconciliation call is the person who comes back after the wait and hands the baton home.
+
 ## What To Test
 
 Repository tests already prove:
 
 - BatonKit can parse generic monitor statuses
 - BatonKit can switch ownership on `down`
-- BatonKit can restore ownership on `up`
+- BatonKit can start failback cooldown on `up`
+- BatonKit can restore ownership after cooldown through failback reconciliation
 
 Repository tests do not prove:
 
