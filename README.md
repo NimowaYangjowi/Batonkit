@@ -46,28 +46,39 @@ Install the packages:
 npm install @batonkit/core @batonkit/postgres @batonkit/worker @batonkit/next
 ```
 
-Create the database tables:
+Create a shared Postgres-backed queue and control plane:
+
+Plain language: in the snippets below, `db` means your app's Postgres query client. It is the database connection object that BatonKit uses to read and write the shared work queue and the shared baton state.
 
 ```ts
+import { createGatedStore, createJobs } from '@batonkit/core';
 import {
   createControlPlaneMigrationSql,
   createQueueMigrationSql,
+  postgresControlStore,
+  postgresStore,
 } from '@batonkit/postgres';
 
+const baseStore = postgresStore(db);
+const control = postgresControlStore(db);
+
+const localStore = createGatedStore(baseStore, control, 'local');
+const backupStore = createGatedStore(baseStore, control, 'backup');
+const jobs = createJobs({ store: localStore });
+```
+
+Plain language: `baseStore` is the shared Postgres work queue, `control` is the shared baton traffic light, `localStore` is the local worker's view of the queue, and `backupStore` is the cloud backup worker's view.
+
+Create the database tables:
+
+```ts
 await db.query(createQueueMigrationSql());
 await db.query(createControlPlaneMigrationSql());
 ```
 
-Create a shared job client:
+Enqueue a job from your app:
 
 ```ts
-import { createJobs } from '@batonkit/core';
-import { postgresStore } from '@batonkit/postgres';
-
-const jobs = createJobs({
-  store: postgresStore(db),
-});
-
 await jobs.enqueue('generate-preview', { fileId: 'file_123' });
 ```
 
@@ -75,16 +86,16 @@ Add a Next.js control route:
 
 ```ts
 // app/api/batonkit/control/route.ts
-import { createMemoryControlStore } from '@batonkit/core';
 import { createControlPlaneHandlers } from '@batonkit/next';
-
-const control = createMemoryControlStore();
+import { postgresControlStore } from '@batonkit/postgres';
 
 export const { GET, POST } = createControlPlaneHandlers({
-  control,
+  control: postgresControlStore(db),
   secret: process.env.BATONKIT_CONTROL_SECRET!,
 });
 ```
+
+Plain language: this route is the secure door that lets your monitor or your backup worker report "local is down" or "local is healthy again" into the shared baton state.
 
 Run a local worker on your own machine:
 
@@ -95,14 +106,28 @@ const generatePreview = defineJob('generate-preview', async (payload, ctx) => {
   ctx.logger.info('Generating preview', { payload });
 });
 
-await createWorker({
-  store,
+const localWorker = createWorker({
+  store: localStore,
   workerId: 'office-mac-mini',
   jobs: [generatePreview],
-}).start();
+});
+
+await localWorker.start();
 ```
 
-Run a backup worker in the cloud with the same job definitions, but use a gated store for the `backup` platform. The backup worker will stay passive while local ownership is active.
+Run a backup worker in the cloud with the same job definitions:
+
+```ts
+const backupWorker = createWorker({
+  store: backupStore,
+  workerId: 'railway-backup-worker',
+  jobs: [generatePreview],
+});
+
+await backupWorker.start();
+```
+
+The backup worker will stay passive while local ownership is active because `backupStore` is claim-gated by the shared control plane.
 
 ## How Local-First Failover Works
 
@@ -189,6 +214,8 @@ Before a public beta, rerun the Railway-backed drill in your own environment and
 
 See `examples/next-postgres` for a small Next.js-style upload preview example with local and backup worker entrypoints.
 
+That example intentionally uses in-memory stores to keep the shape easy to inspect. For a real multi-process app, use the Postgres-backed `postgresStore(...)` and `postgresControlStore(...)` path shown in the Quick Start above.
+
 Install it separately from the repository root:
 
 ```bash
@@ -206,4 +233,3 @@ npm run dev
 - `docs/api-reference.md`
 - `docs/failover-drill.md`
 - `docs/release.md`
-# Batonkit
