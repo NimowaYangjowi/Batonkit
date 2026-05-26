@@ -70,7 +70,7 @@ npm audit --omit=dev
 And the live drill command, for example:
 
 ```bash
-npm run drill:railway-live
+npm run drill:railway-live:remote
 ```
 
 ## Acceptance Criteria
@@ -84,18 +84,24 @@ npm run drill:railway-live
 
 ## Phase Review
 
-To be completed after implementation.
+- Regression risk: medium-low. The new remote drill command resets drill tables before running, which is appropriate for the isolated lab project but should not be pointed at shared production data.
+- API clarity: improved. The live drill now has a dedicated command for the real user-facing flow where the local machine owns jobs first and the Railway backup worker only handles the middle failover job.
+- Overengineering: avoided. The implementation reuses the existing local runtime and provider wake path instead of inventing a separate test harness protocol.
+- Test gaps: acceptable for this phase. The live drill result document captures the job ids, ownership transitions, readiness response, and backup worker log excerpt from the real Railway run.
+- Docs gaps: addressed in `docs/railway-live-drill.md` and `docs/live-drill-results/2026-05-26-railway-live-drill.md`.
+- Performance/cost impact: low but real. The live drill uses Railway TCP proxy access for the local side and leaves the lab resources retained for future release checks.
+- Secret safety: satisfied. Only test-only secrets and the isolated BatonKit lab project were used.
+- Public-package ergonomics: improved because users now have a proven reference path for a real provider drill.
 
 ## Completion Checklist
 
-- [ ] Local worker processed job A
-- [ ] Ownership failed over to backup
-- [ ] Railway backup processed job B
-- [ ] Ownership failed back to local
-- [ ] Local worker processed job C
-- [ ] Results document completed
-- [ ] Verification commands pass
-- [ ] Phase review completed
+- [x] Local worker processed job A
+- [x] Ownership failed over to backup
+- [x] Railway backup processed job B
+- [x] Ownership failed back to local
+- [x] Local worker processed job C
+- [x] Results document completed
+- [x] Verification commands pass
+- [x] Phase review completed
 - [ ] Phase committed
-- [ ] Later phase documents updated if needed
-
+- [x] Later phase documents updated if needed

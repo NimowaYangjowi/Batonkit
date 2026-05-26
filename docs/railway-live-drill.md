@@ -9,9 +9,9 @@ Plain language: this is the checklist for making sure the cloud backup worker ca
 - Local harness proof: complete
 - Railway project: `batonkit-lab`
 - Railway backup service: `backup-worker`
-- Railway Postgres: pending
-- Public backup URL: pending
-- Live Railway failover evidence: pending
+- Railway Postgres: complete
+- Public backup URL: `https://backup-worker-production-f754.up.railway.app`
+- Live Railway failover evidence: complete on 2026-05-26
 
 ## Harness Commands
 
@@ -25,6 +25,12 @@ Run the self-contained local drill against a real Postgres URL:
 
 ```bash
 npm run drill:railway-live
+```
+
+Run the real Railway-backed drill:
+
+```bash
+npm run drill:railway-live:remote
 ```
 
 Run a local worker:
@@ -72,38 +78,55 @@ railway add --service backup-worker
 railway add --database postgres
 ```
 
+If CLI provisioning fails, add Postgres from the Railway dashboard's `Add` flow.
+
 4. Set service variables:
 
 ```txt
-BATONKIT_DATABASE_URL=<Railway Postgres URL>
+BATONKIT_DATABASE_URL=${{Postgres.DATABASE_URL}}
 BATONKIT_CONTROL_SECRET=<test-only secret>
 BATONKIT_PLATFORM=backup
-BATONKIT_PORT=3000
+BATONKIT_FAILBACK_COOLDOWN_MS=0
 ```
 
 5. Deploy the service from the repository root so the workspace packages are available:
 
 ```bash
-railway up --service backup-worker
+railway up --service backup-worker --detach
 ```
 
-6. Generate a Railway domain after deployment:
+6. Generate or confirm a Railway domain after deployment:
 
 ```bash
 railway domain --service backup-worker
 ```
 
-## Initial Execution Notes
+7. Verify readiness:
+
+```bash
+curl https://backup-worker-production-f754.up.railway.app/ready
+```
+
+## Observed Execution
 
 Observed on 2026-05-26:
 
 - `railway init --name batonkit-lab --workspace "Jiwoo's Projects"` succeeded
 - project id: `1fd9d32e-6a14-4b4b-941f-8a38fd3a19be`
 - `railway add --service backup-worker` succeeded
-- `railway add --database postgres` returned `Unauthorized. Please run railway login again.`
-- `railway login -b` requested manual browser activation through `https://railway.com/activate`
+- Railway Postgres was created from the dashboard after CLI database creation returned an authorization error
+- `railway variable set --service backup-worker --skip-deploys BATONKIT_DATABASE_URL='${{Postgres.DATABASE_URL}}' ...` succeeded
+- `railway up --service backup-worker --detach` succeeded
+- `curl https://backup-worker-production-f754.up.railway.app/ready` returned HTTP 200
+- `npm run drill:railway-live:remote` completed successfully
 
-Plain language: BatonKit's code and local drill harness are ready, but the real Railway practice run is currently blocked by Railway asking for a fresh browser login before it will let this machine add the test database.
+Plain language: the real Railway backup worker has now been proven. It took the baton for the middle drill job and then gave it back to the local worker.
+
+## Known Limitations
+
+- Railway CLI deploys and variable updates worked after login, but Postgres provisioning itself still needed the dashboard flow.
+- The remote drill requires a public Railway URL so the provider can wake the backup worker through `/ready` and `/control-plane/refresh`.
+- External Postgres access uses Railway's TCP proxy, so repeated drills should be mindful of connection limits and egress.
 
 ## Cleanup
 
@@ -111,3 +134,7 @@ After the live drill is complete, either:
 
 - delete the whole lab project with `railway delete`, or
 - keep `batonkit-lab` intentionally and record why it remains active
+
+Current decision on 2026-05-26:
+
+- retain `batonkit-lab` for repeatable BatonKit release checks

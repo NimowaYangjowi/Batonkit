@@ -62,6 +62,7 @@ For Railway live drill harness changes, also run:
 
 ```bash
 npm run drill:railway-live
+npm run drill:railway-live:remote
 ```
 
 ## Implementation Rules

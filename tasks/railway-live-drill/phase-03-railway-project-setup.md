@@ -83,24 +83,24 @@ git commit -m "docs: configure railway live drill project"
 
 ## Phase Review
 
-Current blocker on 2026-05-26:
-
-- `railway init --name batonkit-lab --workspace "Jiwoo's Projects"` succeeded.
-- `railway add --service backup-worker` succeeded.
-- `railway add --database postgres` failed with `Unauthorized. Please run railway login again.`
-- `railway login -b` requested manual browser activation at `https://railway.com/activate`.
-
-Plain language: the BatonKit code is ready for the Railway lab, but this machine needs a fresh Railway browser login before it can create the test Postgres database.
+- Regression risk: low. The Railway-specific work stays in the lab project, service variables, and documentation, without changing BatonKit public runtime contracts.
+- API clarity: preserved. Railway remains a provider adapter and deployment target, not a new core package requirement.
+- Overengineering: avoided. The live drill uses one service plus one Postgres database and reuses the existing drill harness instead of adding a second control test app.
+- Test gaps: acceptable for this phase. The setup itself is now proven by a public `/ready` response and by the later live failover execution.
+- Docs gaps: addressed in `docs/railway-live-drill.md` with the exact project id, URL, provisioning path, and retention decision.
+- Performance/cost impact: limited to one retained lab project with one backup worker service and one Railway Postgres database.
+- Secret safety: satisfied. The control secret is test-only and was stored in Railway variables, not committed to the repository.
+- Public-package ergonomics: improved because future maintainers now have an isolated lab project and a concrete setup flow to reproduce.
 
 ## Completion Checklist
 
-- [ ] Railway auth confirmed
+- [x] Railway auth confirmed
 - [x] `batonkit-lab` project created or linked
-- [ ] Railway Postgres added
+- [x] Railway Postgres added
 - [x] Backup worker service created
-- [ ] Backup worker service deployed
-- [ ] `/ready` verified
+- [x] Backup worker service deployed
+- [x] `/ready` verified
 - [x] Docs updated with exact observed values
 - [x] Phase review completed
 - [ ] Phase committed
-- [ ] Later phase documents updated if needed
+- [x] Later phase documents updated if needed

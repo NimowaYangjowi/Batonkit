@@ -10,7 +10,7 @@ Plain language: it gives you a safe fake job called `generate-preview`, a local 
 - `BATONKIT_CONTROL_SECRET`: bearer secret for the backup worker refresh endpoint
 - `BATONKIT_PLATFORM`: `local` or `backup` for the worker process
 - `BATONKIT_PORT`: HTTP port for the backup worker service, default `3000`
-- `BATONKIT_READY_URL`: optional public backup service URL used by manual failover commands
+- `BATONKIT_READY_URL`: required for the remote Railway drill and optional for manual failover commands
 - `BATONKIT_WORKER_ID`: optional worker label shown in logs
 - `BATONKIT_FAILBACK_COOLDOWN_MS`: optional failback cooldown for drills, default `0`
 
@@ -26,6 +26,12 @@ Run the self-contained local drill:
 
 ```bash
 npm run drill:railway-live
+```
+
+Run the real Railway-backed drill after the backup worker is deployed:
+
+```bash
+npm run drill:railway-live:remote
 ```
 
 Run a local worker process against the shared Postgres queue:

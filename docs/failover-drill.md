@@ -14,6 +14,14 @@ npm run drill:railway-live
 
 Plain language: this command creates three safe practice jobs. The first must be finished by the local worker, the second by the backup worker, and the third by the local worker again after failback.
 
+Use the deployed Railway backup worker when you want the middle handoff to happen in the real cloud service:
+
+```bash
+npm run drill:railway-live:remote
+```
+
+Plain language: this version still uses your local machine for the first and third jobs, but the second job must be completed by the Railway backup worker.
+
 ## Steps
 
 1. Start the app and apply migrations.

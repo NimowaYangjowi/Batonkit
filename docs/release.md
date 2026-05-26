@@ -20,6 +20,7 @@ npm run test:postgres
 npm run test:pack
 npm run drill:failover
 npm run drill:railway-live
+npm run drill:railway-live:remote
 npm run lint
 npm audit --omit=dev
 ```

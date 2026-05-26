@@ -159,11 +159,17 @@ Run the Railway live drill harness against a real Postgres URL or a local drill 
 npm run drill:railway-live
 ```
 
+Run the real Railway-backed failover drill using the deployed backup worker:
+
+```bash
+npm run drill:railway-live:remote
+```
+
 ## Current Maturity
 
-BatonKit is not production-stable yet. It is a developer-preview package skeleton with passing unit tests, real Postgres integration coverage, pack smoke tests, a simulated failover drill, and a reusable Railway live drill harness.
+BatonKit is not production-stable yet. It is a developer-preview package skeleton with passing unit tests, real Postgres integration coverage, pack smoke tests, a simulated failover drill, a reusable Railway live drill harness, and a completed Railway lab proof run.
 
-Before a public beta, run the harness against a real Railway backup worker and review the public API names.
+Before a public beta, rerun the Railway-backed drill in your own environment and review the public API names.
 
 ## Example
 
