@@ -1,5 +1,5 @@
 {
-  "name": "local-first-worker-next-postgres-example",
+  "name": "batonkit-next-postgres-example",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,9 +13,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@local-first-worker/core": "0.0.0",
-    "@local-first-worker/next": "0.0.0",
-    "@local-first-worker/worker": "0.0.0",
+    "@batonkit/core": "0.0.0",
+    "@batonkit/next": "0.0.0",
+    "@batonkit/worker": "0.0.0",
     "next": "^16.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

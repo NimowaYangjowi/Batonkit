@@ -1,4 +1,4 @@
-# Local First Worker Framework Implementation Plan
+# BatonKit Framework Implementation Plan
 
 > **For implementers:** Execute the phase documents in `tasks/local-first-worker-framework/` in order. Each phase must be committed, reviewed, and used to update later phases before continuing.
 

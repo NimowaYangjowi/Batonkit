@@ -62,6 +62,34 @@ describe('failover decisions', () => {
     );
   });
 
+  it('restores local ownership immediately when cooldown is zero', async () => {
+    const control = createMemoryControlStore();
+    const calls: string[] = [];
+    const provider: BackupProvider = {
+      wake: async () => undefined,
+      park: async () => {
+        calls.push('park');
+      },
+    };
+
+    await applyFailoverEvent({
+      control,
+      provider,
+      event: 'down',
+      failbackCooldownMs: 0,
+    });
+    const result = await applyFailoverEvent({
+      control,
+      provider,
+      event: 'up',
+      failbackCooldownMs: 0,
+    });
+
+    expect(result.action).toBe('restored_local');
+    expect((await control.getState()).activeOwner).toBe('local');
+    expect(calls).toEqual(['park']);
+  });
+
   it('rolls ownership back when backup wake fails', async () => {
     const control = createMemoryControlStore();
     const provider: BackupProvider = {

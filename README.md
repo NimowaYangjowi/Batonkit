@@ -1,4 +1,4 @@
-# Local First Worker
+# BatonKit
 
 Postgres-first background jobs for small Next.js/Vercel teams that want to run work on local hardware first and wake a cloud backup worker only when needed.
 
@@ -15,7 +15,7 @@ Many small products have useful background work that does not need to finish ins
 - running scheduled maintenance
 - processing AI tasks with local hardware
 
-Keeping cloud workers always awake for that work can be wasteful. Local First Worker lets a local worker own the queue by default, while keeping a backup worker ready to wake during outages.
+Keeping cloud workers always awake for that work can be wasteful. BatonKit lets a local worker own the queue by default, while keeping a backup worker ready to wake during outages.
 
 ## When Should I Not Use This?
 
@@ -31,18 +31,38 @@ This project is intentionally smaller: one local-first worker system, one Postgr
 
 ## Packages
 
-- `@local-first-worker/core`: job queue contracts, memory store, control plane, failover engine
-- `@local-first-worker/postgres`: Postgres queue SQL and query-client store
-- `@local-first-worker/worker`: job definitions and worker runtime
-- `@local-first-worker/next`: Next.js App Router control-plane helpers
-- `@local-first-worker/provider-railway`: Railway backup provider
-- `@local-first-worker/monitor-webhook`: generic monitor webhook parsing
+- `@batonkit/core`: job queue contracts, memory store, control plane, failover engine
+- `@batonkit/postgres`: Postgres queue SQL and query-client store
+- `@batonkit/worker`: job definitions and worker runtime
+- `@batonkit/next`: Next.js App Router control-plane helpers
+- `@batonkit/provider-railway`: Railway backup provider
+- `@batonkit/monitor-webhook`: generic monitor webhook parsing
 
 ## Quick Start
 
+Install the packages:
+
+```bash
+npm install @batonkit/core @batonkit/postgres @batonkit/worker @batonkit/next
+```
+
+Create the database tables:
+
 ```ts
-import { createJobs } from '@local-first-worker/core';
-import { postgresStore } from '@local-first-worker/postgres';
+import {
+  createControlPlaneMigrationSql,
+  createQueueMigrationSql,
+} from '@batonkit/postgres';
+
+await db.query(createQueueMigrationSql());
+await db.query(createControlPlaneMigrationSql());
+```
+
+Create a shared job client:
+
+```ts
+import { createJobs } from '@batonkit/core';
+import { postgresStore } from '@batonkit/postgres';
 
 const jobs = createJobs({
   store: postgresStore(db),
@@ -51,10 +71,25 @@ const jobs = createJobs({
 await jobs.enqueue('generate-preview', { fileId: 'file_123' });
 ```
 
-Run a local worker:
+Add a Next.js control route:
 
 ```ts
-import { createWorker, defineJob } from '@local-first-worker/worker';
+// app/api/batonkit/control/route.ts
+import { createMemoryControlStore } from '@batonkit/core';
+import { createControlPlaneHandlers } from '@batonkit/next';
+
+const control = createMemoryControlStore();
+
+export const { GET, POST } = createControlPlaneHandlers({
+  control,
+  secret: process.env.BATONKIT_CONTROL_SECRET!,
+});
+```
+
+Run a local worker on your own machine:
+
+```ts
+import { createWorker, defineJob } from '@batonkit/worker';
 
 const generatePreview = defineJob('generate-preview', async (payload, ctx) => {
   ctx.logger.info('Generating preview', { payload });
@@ -66,6 +101,8 @@ await createWorker({
   jobs: [generatePreview],
 }).start();
 ```
+
+Run a backup worker in the cloud with the same job definitions, but use a gated store for the `backup` platform. The backup worker will stay passive while local ownership is active.
 
 ## How Local-First Failover Works
 
@@ -85,6 +122,42 @@ The Postgres helpers create:
 - `lfw_job_events`
 - `lfw_control_state`
 - `lfw_worker_heartbeats`
+
+## Test The Package Locally
+
+From this repository:
+
+```bash
+npm run build
+npm run typecheck
+npm run test
+npm run lint
+npm audit --omit=dev
+```
+
+Run a real Postgres integration test with Docker:
+
+```bash
+npm run test:postgres
+```
+
+Pack the npm packages and install them into a temporary consumer project:
+
+```bash
+npm run test:pack
+```
+
+Run the failover drill against a local simulated backup worker endpoint:
+
+```bash
+npm run drill:failover
+```
+
+## Current Maturity
+
+BatonKit is not production-stable yet. It is a developer-preview package skeleton with passing unit tests, real Postgres integration coverage, pack smoke tests, and a simulated failover drill.
+
+Before a public beta, run a real provider drill against your actual Railway service and review the public API names.
 
 ## Example
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createJobs, createMemoryStore } from '@local-first-worker/core';
+import { createJobs, createMemoryStore } from '@batonkit/core';
 
 import { createWorker, defineJob } from './index.js';
 

@@ -16,12 +16,12 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@local-first-worker/core": ["packages/core/src/index.ts"],
-      "@local-first-worker/postgres": ["packages/postgres/src/index.ts"],
-      "@local-first-worker/worker": ["packages/worker/src/index.ts"],
-      "@local-first-worker/next": ["packages/next/src/index.ts"],
-      "@local-first-worker/provider-railway": ["packages/provider-railway/src/index.ts"],
-      "@local-first-worker/monitor-webhook": ["packages/monitor-webhook/src/index.ts"]
+      "@batonkit/core": ["packages/core/src/index.ts"],
+      "@batonkit/postgres": ["packages/postgres/src/index.ts"],
+      "@batonkit/worker": ["packages/worker/src/index.ts"],
+      "@batonkit/next": ["packages/next/src/index.ts"],
+      "@batonkit/provider-railway": ["packages/provider-railway/src/index.ts"],
+      "@batonkit/monitor-webhook": ["packages/monitor-webhook/src/index.ts"]
     }
   }
 }

@@ -7,7 +7,7 @@ Plain language: this is the background engine that picks up work from the queue 
 ## Minimal Usage
 
 ```ts
-import { createWorker, defineJob } from '@local-first-worker/worker';
+import { createWorker, defineJob } from '@batonkit/worker';
 
 const generatePreview = defineJob('generate-preview', async (payload, ctx) => {
   ctx.logger.info('Generating preview', { payload });

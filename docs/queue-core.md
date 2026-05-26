@@ -1,6 +1,6 @@
 # Queue Core
 
-Local First Worker v1 uses Postgres as the durable job queue and control store.
+BatonKit v1 uses Postgres as the durable job queue and control store.
 
 Plain language: the database is the shared notebook where the app writes work, workers reserve work, and completed or failed work is recorded.
 
@@ -15,8 +15,8 @@ Plain language: the database is the shared notebook where the app writes work, w
 ## Minimal Usage
 
 ```ts
-import { createJobs } from '@local-first-worker/core';
-import { postgresStore } from '@local-first-worker/postgres';
+import { createJobs } from '@batonkit/core';
+import { postgresStore } from '@batonkit/postgres';
 
 const jobs = createJobs({
   store: postgresStore(db),

@@ -1,4 +1,4 @@
-import type { FailoverMonitorEvent } from '@local-first-worker/core';
+import type { FailoverMonitorEvent } from '@batonkit/core';
 
 export interface ParsedMonitorWebhookEvent {
   event: FailoverMonitorEvent;

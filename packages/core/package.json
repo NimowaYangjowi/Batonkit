@@ -1,7 +1,7 @@
 {
-  "name": "@local-first-worker/core",
+  "name": "@batonkit/core",
   "version": "0.0.0",
-  "description": "Core types and public primitives for Local First Worker.",
+  "description": "Core types and public primitives for BatonKit.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,

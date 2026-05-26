@@ -1,7 +1,7 @@
 {
-  "name": "@local-first-worker/next",
+  "name": "@batonkit/next",
   "version": "0.0.0",
-  "description": "Next.js helpers for Local First Worker.",
+  "description": "Next.js helpers for BatonKit.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
@@ -24,6 +24,6 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@local-first-worker/core": "0.0.0"
+    "@batonkit/core": "0.0.0"
   }
 }

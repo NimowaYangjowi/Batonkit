@@ -1,4 +1,4 @@
-import type { BackupProvider } from '@local-first-worker/core';
+import type { BackupProvider } from '@batonkit/core';
 
 export interface RailwayProviderOptions {
   readyUrl: string;

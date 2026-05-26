@@ -3,7 +3,7 @@ import {
   createJobs,
   createMemoryControlStore,
   createMemoryStore,
-} from '@local-first-worker/core';
+} from '@batonkit/core';
 
 export const control = createMemoryControlStore();
 const baseStore = createMemoryStore();

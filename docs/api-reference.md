@@ -1,6 +1,6 @@
 # API Reference
 
-## `@local-first-worker/core`
+## `@batonkit/core`
 
 ### `createJobs({ store })`
 
@@ -30,7 +30,7 @@ Wraps a job store so only the active owner can claim jobs.
 
 Applies a monitor `down` or `up` event to the control plane.
 
-## `@local-first-worker/postgres`
+## `@batonkit/postgres`
 
 ### `createQueueMigrationSql()`
 
@@ -44,7 +44,7 @@ Returns SQL for `lfw_control_state` and `lfw_worker_heartbeats`.
 
 Creates a `JobStore` from a minimal query client.
 
-## `@local-first-worker/worker`
+## `@batonkit/worker`
 
 ### `defineJob(name, handler)`
 
@@ -58,19 +58,19 @@ Creates a worker runtime with:
 - `stop()`
 - `runOnce()`
 
-## `@local-first-worker/next`
+## `@batonkit/next`
 
 ### `createControlPlaneHandlers({ control, secret })`
 
 Returns `GET` and `POST` handlers compatible with Next.js App Router route files.
 
-## `@local-first-worker/provider-railway`
+## `@batonkit/provider-railway`
 
 ### `railwayProvider({ readyUrl, refreshSecret, fetch? })`
 
 Creates a backup provider that checks readiness and refreshes the backup worker control plane.
 
-## `@local-first-worker/monitor-webhook`
+## `@batonkit/monitor-webhook`
 
 ### `parseMonitorWebhookEvent(body)`
 

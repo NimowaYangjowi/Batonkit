@@ -22,7 +22,7 @@ Workers should report:
 ## Next.js Route Helpers
 
 ```ts
-import { createControlPlaneHandlers } from '@local-first-worker/next';
+import { createControlPlaneHandlers } from '@batonkit/next';
 
 export const { GET, POST } = createControlPlaneHandlers({
   control,

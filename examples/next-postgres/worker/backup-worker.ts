@@ -1,4 +1,4 @@
-import { createWorker, defineJob } from '@local-first-worker/worker';
+import { createWorker, defineJob } from '@batonkit/worker';
 
 import { backupStore } from '../lib/localfirst';
 

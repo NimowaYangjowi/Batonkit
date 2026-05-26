@@ -1,4 +1,4 @@
-# Local First Worker Framework Plan
+# BatonKit Framework Plan
 
 > **For implementers:** Read this folder before writing code. Each phase document begins with the same operating rules. Follow those rules literally: complete one phase, commit it, review it, update the completed phase notes, then update future phase plans if implementation changed the design.
 

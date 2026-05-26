@@ -1,5 +1,5 @@
-import type { JobRecord, JobStore } from '@local-first-worker/core';
-import { createJobs } from '@local-first-worker/core';
+import type { JobRecord, JobStore } from '@batonkit/core';
+import { createJobs } from '@batonkit/core';
 
 export interface WorkerLogger {
   info: (message: string, context?: Record<string, unknown>) => void;

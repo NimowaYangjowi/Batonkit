@@ -1,7 +1,7 @@
 {
-  "name": "@local-first-worker/provider-railway",
+  "name": "@batonkit/provider-railway",
   "version": "0.0.0",
-  "description": "Railway provider adapter for Local First Worker.",
+  "description": "Railway provider adapter for BatonKit.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
@@ -24,6 +24,6 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@local-first-worker/core": "0.0.0"
+    "@batonkit/core": "0.0.0"
   }
 }

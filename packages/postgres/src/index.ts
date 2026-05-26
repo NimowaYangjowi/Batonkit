@@ -3,7 +3,7 @@ import type {
   EnqueueInput,
   JobRecord,
   JobStore,
-} from '@local-first-worker/core';
+} from '@batonkit/core';
 
 export interface QueryResult<Row = Record<string, unknown>> {
   rows: Row[];
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS lfw_jobs (
   id text PRIMARY KEY DEFAULT ('job_' || gen_random_uuid()::text),
   name text NOT NULL,
   payload jsonb NOT NULL,
-  status text NOT NULL CHECK (status IN ('pending', 'running', 'completed', 'failed', 'dead_letter')),
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'running', 'completed', 'failed', 'dead_letter')),
   run_at timestamptz NOT NULL DEFAULT now(),
   attempts integer NOT NULL DEFAULT 0,
   max_attempts integer NOT NULL DEFAULT 3,

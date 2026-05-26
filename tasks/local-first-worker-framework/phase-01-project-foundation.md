@@ -75,7 +75,7 @@ git commit -m "chore: initialize local first worker workspace"
 ## Phase Review
 
 - Regression risk: Low. This phase only adds project scaffolding and does not implement runtime behavior.
-- API clarity: Acceptable for Phase 01. Package names use the generic `@local-first-worker/*` namespace and avoid Redprint-specific concepts.
+- API clarity: Acceptable for Phase 01. Package names use the generic `@batonkit/*` namespace and avoid Redprint-specific concepts.
 - Overengineering risk: Low. The workspace has separate package shells because later phases need independent public entrypoints, but each shell is intentionally empty.
 - Test gaps: Acceptable for scaffolding. Only a smoke test exists; behavioral tests start in Phase 02.
 - Docs gaps: Acceptable. Public docs are placeholders, with detailed public README work deferred to Phase 06.

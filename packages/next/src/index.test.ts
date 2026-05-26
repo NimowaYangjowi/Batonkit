@@ -5,7 +5,7 @@ import {
   createJobs,
   createMemoryControlStore,
   createMemoryStore,
-} from '@local-first-worker/core';
+} from '@batonkit/core';
 
 import { createControlPlaneHandlers } from './index.js';
 

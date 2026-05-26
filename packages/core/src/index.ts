@@ -412,6 +412,17 @@ export async function applyFailoverEvent(
     return { action: 'noop', state: current };
   }
 
+  if (input.failbackCooldownMs <= 0) {
+    const restored = await input.control.updateOwnership({
+      mode: 'local_primary',
+      activeOwner: 'local',
+      failoverReason: null,
+      failbackNotBefore: null,
+    });
+    await input.provider.park();
+    return { action: 'restored_local', state: restored };
+  }
+
   if (!current.failbackNotBefore) {
     const nextState = await input.control.updateOwnership({
       mode: 'backup_active',

@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve Local First Worker.
+Thanks for helping improve BatonKit.
 
 ## Development
 

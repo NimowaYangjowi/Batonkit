@@ -2,7 +2,7 @@ import type {
   ControlStore,
   RecordHeartbeatInput,
   UpdateOwnershipInput,
-} from '@local-first-worker/core';
+} from '@batonkit/core';
 
 export interface ControlPlaneHandlersOptions {
   control: ControlStore;

@@ -21,7 +21,7 @@ npm run lint
 
 ## Publishing
 
-Packages should be published under the `@local-first-worker` scope.
+Packages should be published under the `@batonkit` scope.
 
 Do not publish until:
 

@@ -1,4 +1,4 @@
-import { createControlPlaneHandlers } from '@local-first-worker/next';
+import { createControlPlaneHandlers } from '@batonkit/next';
 
 import { control } from '../../../lib/localfirst';
 
