@@ -21,3 +21,5 @@ Use this with a BatonKit store from `@batonkit/core` or `@batonkit/postgres` dep
 Workers only claim the job names you register in their `jobs` list. Plain language: a preview worker leaves report jobs in the queue for the report worker instead of marking them failed.
 
 Pass `control`, `platform`, and `heartbeatIntervalMs` to report worker heartbeats. Plain language: this lets the shared baton state show that the local or backup worker has checked in recently.
+
+If the worker's main polling loop hits an unhandled runtime or store error, it logs that failure and starts reporting a `degraded` heartbeat instead of continuing to look fully healthy. Plain language: if the job engine jams, BatonKit flips the warning light instead of pretending the machine is still fine.

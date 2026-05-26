@@ -82,16 +82,18 @@ export function createWorker(options: CreateWorkerOptions): WorkerRuntime {
   const heartbeatIntervalMs = Math.max(1, options.heartbeatIntervalMs ?? 30_000);
   const logger = options.logger ?? defaultLogger;
   const heartbeatEnabled = Boolean(options.control && options.platform);
+  const healthyHeartbeatStatus = options.heartbeatStatus ?? 'ok';
   let isStopped = false;
   let loop: Promise<void> | null = null;
   let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  let currentHeartbeatStatus: WorkerHealthStatus = healthyHeartbeatStatus;
 
   if ((options.control && !options.platform) || (!options.control && options.platform)) {
     throw new Error('Worker heartbeat requires both control and platform options');
   }
 
   async function recordHeartbeat(
-    status: WorkerHealthStatus = options.heartbeatStatus ?? 'ok'
+    status: WorkerHealthStatus = currentHeartbeatStatus
   ): Promise<void> {
     if (!heartbeatEnabled || !options.control || !options.platform) {
       return;
@@ -174,6 +176,7 @@ export function createWorker(options: CreateWorkerOptions): WorkerRuntime {
     }
 
     isStopped = false;
+    currentHeartbeatStatus = healthyHeartbeatStatus;
     await recordHeartbeat();
     if (heartbeatEnabled) {
       heartbeatTimer = setInterval(() => {
@@ -181,11 +184,21 @@ export function createWorker(options: CreateWorkerOptions): WorkerRuntime {
       }, heartbeatIntervalMs);
     }
     loop = (async () => {
-      while (!isStopped) {
-        const result = await runBatch();
-        if (result.processed === 0) {
-          await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+      try {
+        while (!isStopped) {
+          const result = await runBatch();
+          if (result.processed === 0) {
+            await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+          }
         }
+      } catch (error) {
+        currentHeartbeatStatus = 'degraded';
+        logger.error('Worker polling loop failed', {
+          workerId: options.workerId,
+          platform: options.platform,
+          error: errorMessage(error),
+        });
+        await recordHeartbeat();
       }
     })();
   }

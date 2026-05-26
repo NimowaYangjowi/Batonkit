@@ -52,3 +52,7 @@ const worker = createWorker({
 Heartbeat setup is optional. When enabled, the worker records an `ok` heartbeat on `start()`, keeps refreshing it on the configured interval, and records `stopping` when `stop()` completes.
 
 Plain language: this is the status light for the worker. The control plane can show whether the local or backup worker has checked in recently.
+
+If the main polling loop hits an unhandled store or runtime error, the worker logs the failure and starts reporting `degraded` heartbeats until you stop or replace that worker process.
+
+Plain language: if the engine stalls, the status light should turn into a warning light instead of pretending everything is normal.

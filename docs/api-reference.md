@@ -82,6 +82,8 @@ Optional heartbeat fields:
 - `heartbeatIntervalMs`: heartbeat refresh interval, default `30000`
 - `heartbeatStatus`: health status to report, default `ok`
 
+When the worker's main polling loop hits an unhandled runtime or store error, later heartbeat refreshes report `degraded` until the worker is stopped.
+
 ## `@batonkit/next`
 
 ### `createControlPlaneHandlers({ control, secret })`

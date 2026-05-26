@@ -4,6 +4,7 @@ import {
   createJobs,
   createMemoryControlStore,
   createMemoryStore,
+  type JobStore,
   type RecordHeartbeatInput,
 } from '@batonkit/core';
 
@@ -217,5 +218,104 @@ describe('worker runtime', () => {
       platform: 'local',
       error: 'heartbeat failed',
     });
+  });
+
+  it('records degraded heartbeats when the polling loop fails', async () => {
+    vi.useFakeTimers();
+    const baseControl = createMemoryControlStore();
+    const heartbeats: RecordHeartbeatInput[] = [];
+    const errors: Array<Record<string, unknown> | undefined> = [];
+    const brokenStore: JobStore = {
+      enqueue: async () => {
+        throw new Error('not used');
+      },
+      claimNext: async () => {
+        throw new Error('store unavailable');
+      },
+      complete: async () => {
+        throw new Error('not used');
+      },
+      fail: async () => {
+        throw new Error('not used');
+      },
+      get: async () => null,
+    };
+    const worker = createWorker({
+      store: brokenStore,
+      control: {
+        ...baseControl,
+        recordHeartbeat: async (input) => {
+          heartbeats.push(input);
+          return baseControl.recordHeartbeat(input);
+        },
+      },
+      platform: 'local',
+      workerId: 'local-worker',
+      jobs: [defineJob('generate-preview', async () => undefined)],
+      heartbeatIntervalMs: 1_000,
+      pollIntervalMs: 1_000,
+      logger: {
+        info: () => undefined,
+        error: (_message, context) => {
+          errors.push(context);
+        },
+      },
+    });
+
+    await worker.start();
+    await vi.runAllTicks();
+    await vi.advanceTimersByTimeAsync(1_000);
+
+    expect(heartbeats).toContainEqual(
+      expect.objectContaining({
+        platform: 'local',
+        workerId: 'local-worker',
+        status: 'ok',
+      })
+    );
+    expect(heartbeats).toContainEqual(
+      expect.objectContaining({
+        platform: 'local',
+        workerId: 'local-worker',
+        status: 'degraded',
+      })
+    );
+    expect(errors[0]).toMatchObject({
+      workerId: 'local-worker',
+      error: 'store unavailable',
+    });
+
+    await worker.stop();
+  });
+
+  it('stops cleanly after the polling loop degrades', async () => {
+    const control = createMemoryControlStore();
+    const worker = createWorker({
+      store: {
+        enqueue: async () => {
+          throw new Error('not used');
+        },
+        claimNext: async () => {
+          throw new Error('fatal polling error');
+        },
+        complete: async () => {
+          throw new Error('not used');
+        },
+        fail: async () => {
+          throw new Error('not used');
+        },
+        get: async () => null,
+      },
+      control,
+      platform: 'local',
+      workerId: 'local-worker',
+      jobs: [defineJob('generate-preview', async () => undefined)],
+      pollIntervalMs: 1,
+    });
+
+    await worker.start();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await expect(worker.stop()).resolves.toBeUndefined();
+    expect((await control.getState()).localHeartbeat?.status).toBe('stopping');
   });
 });
