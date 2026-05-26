@@ -69,16 +69,22 @@ git commit -m "feat: add postgres control store"
 
 ## Phase Review
 
-To be completed after implementation.
+- Regression risk: low. The new Postgres control store is additive and reuses the existing `ControlStore` contract rather than inventing a second control-plane API.
+- API clarity: improved. Consumers now have a durable option for the control-plane state that matches the existing in-memory behavior.
+- Overengineering: avoided. The implementation uses the existing `lfw_control_state` and `lfw_worker_heartbeats` tables with a minimal query-client contract.
+- Test gaps: acceptable for this phase. Unit tests cover query-client behavior and integration tests cover durable ownership plus claim gating through real Postgres.
+- Docs gaps: addressed in `docs/control-plane.md` and `docs/api-reference.md`.
+- Performance/cost impact: low. The implementation currently reads the control row and heartbeat rows separately, which is acceptable for v1 drill and control-plane usage.
+- Secret safety: no new secret surfaces introduced.
+- Public-package ergonomics: improved because the durable control store now lives in the same Postgres package users already install for the queue.
 
 ## Completion Checklist
 
-- [ ] Failing tests written first
-- [ ] `postgresControlStore` implemented
-- [ ] Real Postgres integration coverage added
-- [ ] Docs updated
-- [ ] Verification commands pass
-- [ ] Phase review completed
-- [ ] Phase committed
-- [ ] Later phase documents updated if needed
-
+- [x] Failing tests written first
+- [x] `postgresControlStore` implemented
+- [x] Real Postgres integration coverage added
+- [x] Docs updated
+- [x] Verification commands pass
+- [x] Phase review completed
+- [x] Phase committed
+- [x] Later phase documents updated if needed

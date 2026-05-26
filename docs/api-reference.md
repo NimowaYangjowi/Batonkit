@@ -40,6 +40,10 @@ Returns SQL for `lfw_jobs` and `lfw_job_events`.
 
 Returns SQL for `lfw_control_state` and `lfw_worker_heartbeats`.
 
+### `postgresControlStore(queryClient)`
+
+Creates a durable `ControlStore` backed by Postgres for ownership and heartbeat state.
+
 ### `postgresStore(queryClient)`
 
 Creates a `JobStore` from a minimal query client.
@@ -75,4 +79,3 @@ Creates a backup provider that checks readiness and refreshes the backup worker 
 ### `parseMonitorWebhookEvent(body)`
 
 Parses generic monitor payloads into `down` or `up` failover events.
-

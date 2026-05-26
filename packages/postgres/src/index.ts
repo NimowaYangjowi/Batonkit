@@ -1,8 +1,14 @@
 import type {
   ClaimOptions,
+  ControlState,
+  ControlStore,
   EnqueueInput,
   JobRecord,
   JobStore,
+  RecordHeartbeatInput,
+  UpdateOwnershipInput,
+  WorkerHeartbeat,
+  WorkerPlatform,
 } from '@batonkit/core';
 
 export interface QueryResult<Row = Record<string, unknown>> {
@@ -26,6 +32,21 @@ interface JobRow {
   last_error: string | null;
   created_at: Date | string;
   updated_at: Date | string;
+}
+
+interface ControlStateRow {
+  mode: ControlState['mode'];
+  active_owner: ControlState['activeOwner'];
+  failover_reason: string | null;
+  failback_not_before: Date | string | null;
+  updated_at: Date | string;
+}
+
+interface HeartbeatRow {
+  platform: WorkerPlatform;
+  worker_id: string;
+  status: WorkerHeartbeat['status'];
+  observed_at: Date | string;
 }
 
 function toDate(value: Date | string | null): Date | null {
@@ -60,6 +81,62 @@ function firstRow(result: QueryResult<JobRow>, action: string): JobRecord {
 
 function asJobRows(result: QueryResult): QueryResult<JobRow> {
   return result as unknown as QueryResult<JobRow>;
+}
+
+function asControlRows(result: QueryResult): QueryResult<ControlStateRow> {
+  return result as unknown as QueryResult<ControlStateRow>;
+}
+
+function asHeartbeatRows(result: QueryResult): QueryResult<HeartbeatRow> {
+  return result as unknown as QueryResult<HeartbeatRow>;
+}
+
+function toHeartbeat(row: HeartbeatRow): WorkerHeartbeat {
+  return {
+    platform: row.platform,
+    workerId: row.worker_id,
+    status: row.status,
+    observedAt: toDate(row.observed_at) ?? new Date(0),
+  };
+}
+
+function toControlState(
+  row: ControlStateRow,
+  heartbeatRows: HeartbeatRow[]
+): ControlState {
+  const localHeartbeat = heartbeatRows.find((heartbeat) => heartbeat.platform === 'local');
+  const backupHeartbeat = heartbeatRows.find((heartbeat) => heartbeat.platform === 'backup');
+
+  return {
+    mode: row.mode,
+    activeOwner: row.active_owner,
+    failoverReason: row.failover_reason,
+    failbackNotBefore: toDate(row.failback_not_before),
+    localHeartbeat: localHeartbeat ? toHeartbeat(localHeartbeat) : null,
+    backupHeartbeat: backupHeartbeat ? toHeartbeat(backupHeartbeat) : null,
+    updatedAt: toDate(row.updated_at) ?? new Date(0),
+  };
+}
+
+async function getControlState(client: QueryClient): Promise<ControlState> {
+  const [controlResult, heartbeatResult] = await Promise.all([
+    client.query(
+      `SELECT mode, active_owner, failover_reason, failback_not_before, updated_at
+       FROM lfw_control_state
+       WHERE id = 'default'`
+    ),
+    client.query(
+      `SELECT platform, worker_id, status, observed_at
+       FROM lfw_worker_heartbeats`
+    ),
+  ]);
+
+  const controlRow = asControlRows(controlResult).rows[0];
+  if (!controlRow) {
+    throw new Error('Postgres control state row "default" is missing');
+  }
+
+  return toControlState(controlRow, asHeartbeatRows(heartbeatResult).rows);
 }
 
 export function createQueueMigrationSql(): string {
@@ -198,6 +275,57 @@ export function postgresStore(client: QueryClient): JobStore {
       const result = await client.query('SELECT * FROM lfw_jobs WHERE id = $1', [id]);
       const row = asJobRows(result).rows[0];
       return row ? toJobRecord(row) : null;
+    },
+  };
+}
+
+export function postgresControlStore(client: QueryClient): ControlStore {
+  return {
+    getState: () => getControlState(client),
+
+    async updateOwnership(input: UpdateOwnershipInput) {
+      await client.query(
+        `UPDATE lfw_control_state
+         SET mode = $1,
+             active_owner = $2,
+             failover_reason = $3,
+             failback_not_before = $4,
+             updated_at = now()
+         WHERE id = 'default'`,
+        [
+          input.mode,
+          input.activeOwner,
+          input.failoverReason ?? null,
+          input.failbackNotBefore ?? null,
+        ]
+      );
+
+      return getControlState(client);
+    },
+
+    async recordHeartbeat(input: RecordHeartbeatInput) {
+      await client.query(
+        `INSERT INTO lfw_worker_heartbeats (platform, worker_id, status, observed_at, updated_at)
+         VALUES ($1, $2, $3, COALESCE($4::timestamptz, now()), now())
+         ON CONFLICT (platform) DO UPDATE
+         SET worker_id = EXCLUDED.worker_id,
+             status = EXCLUDED.status,
+             observed_at = EXCLUDED.observed_at,
+             updated_at = now()`,
+        [
+          input.platform,
+          input.workerId,
+          input.status ?? 'ok',
+          input.observedAt ?? null,
+        ]
+      );
+
+      return getControlState(client);
+    },
+
+    async allowClaims(platform: WorkerPlatform) {
+      const state = await getControlState(client);
+      return state.activeOwner === platform;
     },
   };
 }
