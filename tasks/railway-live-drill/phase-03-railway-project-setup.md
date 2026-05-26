@@ -83,17 +83,24 @@ git commit -m "docs: configure railway live drill project"
 
 ## Phase Review
 
-To be completed after implementation.
+Current blocker on 2026-05-26:
+
+- `railway init --name batonkit-lab --workspace "Jiwoo's Projects"` succeeded.
+- `railway add --service backup-worker` succeeded.
+- `railway add --database postgres` failed with `Unauthorized. Please run railway login again.`
+- `railway login -b` requested manual browser activation at `https://railway.com/activate`.
+
+Plain language: the BatonKit code is ready for the Railway lab, but this machine needs a fresh Railway browser login before it can create the test Postgres database.
 
 ## Completion Checklist
 
 - [ ] Railway auth confirmed
-- [ ] `batonkit-lab` project created or linked
+- [x] `batonkit-lab` project created or linked
 - [ ] Railway Postgres added
+- [x] Backup worker service created
 - [ ] Backup worker service deployed
 - [ ] `/ready` verified
-- [ ] Docs updated with exact observed values
-- [ ] Phase review completed
+- [x] Docs updated with exact observed values
+- [x] Phase review completed
 - [ ] Phase committed
 - [ ] Later phase documents updated if needed
-
