@@ -85,5 +85,5 @@ git commit -m "docs: document railway live drill"
 - [x] Known limitations documented
 - [x] Verification commands pass
 - [x] Phase review completed
-- [ ] Phase committed
+- [x] Phase committed
 - [x] Later phase documents updated if needed
