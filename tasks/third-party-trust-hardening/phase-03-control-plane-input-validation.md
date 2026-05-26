@@ -68,16 +68,24 @@ git commit -m "fix: validate control plane inputs"
 
 ## Phase Review
 
-- Pending implementation.
+- Regression risk: low to medium. The route now rejects malformed control requests earlier, which changes some failure responses from generic runtime errors to explicit `400` client errors while preserving successful valid requests.
+- API clarity: improved. The accepted heartbeat and ownership request shapes are now documented and enforced together.
+- Overengineering: avoided. This phase uses small inline validators rather than adding a schema dependency or a broad serialization layer.
+- Test gaps: acceptable for this phase. New tests cover malformed JSON, invalid heartbeat bodies, invalid ownership bodies, and a valid heartbeat success path, while existing tests still cover auth and read behavior.
+- Docs gaps: addressed in `docs/control-plane.md`, `docs/api-reference.md`, and `packages/next/README.md`.
+- Performance/cost impact: negligible. Validation is a few field checks before calling the control store.
+- Security impact: positive. The control route now fails closed on malformed bodies and gives clearer client-facing errors without forwarding bad payloads deeper into the system.
+- Public-package ergonomics: improved because adopters now get clearer feedback when wiring monitors, workers, or operator scripts to the control route.
+- Later phase update: phase 04 should focus on a final audit and release-note pass rather than discovering new behavior changes, because the main user-facing docs were already updated during phases 1 through 3.
 
 ## Completion Checklist
 
-- [ ] Failing regression tests written first
-- [ ] Malformed control requests return clear 400 responses
-- [ ] Valid requests still succeed
-- [ ] Auth behavior preserved
-- [ ] Docs updated if public behavior changes
-- [ ] Verification commands pass
-- [ ] Phase review completed
+- [x] Failing regression tests written first
+- [x] Malformed control requests return clear 400 responses
+- [x] Valid requests still succeed
+- [x] Auth behavior preserved
+- [x] Docs updated if public behavior changes
+- [x] Verification commands pass
+- [x] Phase review completed
 - [ ] Phase committed
-- [ ] Later phase documents updated if needed
+- [x] Later phase documents updated if needed

@@ -94,6 +94,13 @@ Returns `GET` and `POST` handlers compatible with Next.js App Router route files
 
 `GET` and `POST` require `Authorization: Bearer <secret>` by default. Pass `publicRead: true` only when control-plane state is safe to expose publicly.
 
+`POST` accepts:
+
+- `type: "heartbeat"` with `platform`, `workerId`, and optional `status` / `observedAt`
+- `type: "ownership"` with `mode`, `activeOwner`, and optional `failoverReason` / `failbackNotBefore`
+
+Malformed JSON and invalid request bodies return `400`.
+
 ## `@batonkit/provider-railway`
 
 ### `railwayProvider({ readyUrl, refreshSecret, fetch? })`

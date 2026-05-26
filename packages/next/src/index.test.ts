@@ -66,6 +66,109 @@ describe('control plane', () => {
     expect(response.status).toBe(401);
   });
 
+  it('rejects malformed JSON bodies with a clear client error', async () => {
+    const handlers = createControlPlaneHandlers({
+      control: createMemoryControlStore(),
+      secret: 'test-secret',
+    });
+
+    const response = await handlers.POST(
+      new Request('https://example.test/control', {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer test-secret',
+          'content-type': 'application/json',
+        },
+        body: '{"type":',
+      })
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: 'invalid control event body',
+    });
+  });
+
+  it('rejects malformed heartbeat events with a clear client error', async () => {
+    const handlers = createControlPlaneHandlers({
+      control: createMemoryControlStore(),
+      secret: 'test-secret',
+    });
+
+    const response = await handlers.POST(
+      new Request('https://example.test/control', {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer test-secret',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'heartbeat',
+          platform: 'sidecar',
+          workerId: '',
+        }),
+      })
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: 'invalid heartbeat event',
+    });
+  });
+
+  it('rejects malformed ownership events with a clear client error', async () => {
+    const handlers = createControlPlaneHandlers({
+      control: createMemoryControlStore(),
+      secret: 'test-secret',
+    });
+
+    const response = await handlers.POST(
+      new Request('https://example.test/control', {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer test-secret',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'ownership',
+          mode: 'backup_active',
+        }),
+      })
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: 'invalid ownership event',
+    });
+  });
+
+  it('accepts well-formed heartbeat events', async () => {
+    const handlers = createControlPlaneHandlers({
+      control: createMemoryControlStore(),
+      secret: 'test-secret',
+    });
+
+    const response = await handlers.POST(
+      new Request('https://example.test/control', {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer test-secret',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'heartbeat',
+          platform: 'local',
+          workerId: 'local-1',
+          status: 'ok',
+        }),
+      })
+    );
+    const body = (await response.json()) as { localHeartbeat?: { workerId: string } };
+
+    expect(response.status).toBe(200);
+    expect(body.localHeartbeat?.workerId).toBe('local-1');
+  });
+
   it('requires a bearer secret for reading route handlers by default', async () => {
     const handlers = createControlPlaneHandlers({
       control: createMemoryControlStore(),

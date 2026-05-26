@@ -84,5 +84,5 @@ git commit -m "fix: align duplicate job id behavior"
 - [x] Docs updated if public behavior changes
 - [x] Verification commands pass
 - [x] Phase review completed
-- [ ] Phase committed
+- [x] Phase committed
 - [x] Later phase documents updated if needed
