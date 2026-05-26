@@ -65,4 +65,48 @@ describe('control plane', () => {
 
     expect(response.status).toBe(401);
   });
+
+  it('requires a bearer secret for reading route handlers by default', async () => {
+    const handlers = createControlPlaneHandlers({
+      control: createMemoryControlStore(),
+      secret: 'test-secret',
+    });
+
+    const response = await handlers.GET(
+      new Request('https://example.test/control')
+    );
+
+    expect(response.status).toBe(401);
+  });
+
+  it('allows authorized reads of route handler state', async () => {
+    const handlers = createControlPlaneHandlers({
+      control: createMemoryControlStore(),
+      secret: 'test-secret',
+    });
+
+    const response = await handlers.GET(
+      new Request('https://example.test/control', {
+        headers: { authorization: 'Bearer test-secret' },
+      })
+    );
+    const body = (await response.json()) as { activeOwner: string };
+
+    expect(response.status).toBe(200);
+    expect(body.activeOwner).toBe('local');
+  });
+
+  it('allows public reads only when explicitly enabled', async () => {
+    const handlers = createControlPlaneHandlers({
+      control: createMemoryControlStore(),
+      secret: 'test-secret',
+      publicRead: true,
+    });
+
+    const response = await handlers.GET(
+      new Request('https://example.test/control')
+    );
+
+    expect(response.status).toBe(200);
+  });
 });

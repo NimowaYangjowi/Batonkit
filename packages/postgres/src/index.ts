@@ -199,10 +199,11 @@ export function postgresStore(client: QueryClient): JobStore {
   return {
     async enqueue(input: EnqueueInput) {
       const result = await client.query(
-        `INSERT INTO lfw_jobs (name, payload, run_at, max_attempts)
-         VALUES ($1, $2::jsonb, COALESCE($3::timestamptz, now()), COALESCE($4::integer, 3))
+        `INSERT INTO lfw_jobs (id, name, payload, run_at, max_attempts)
+         VALUES (COALESCE($1::text, 'job_' || gen_random_uuid()::text), $2, $3::jsonb, COALESCE($4::timestamptz, now()), COALESCE($5::integer, 3))
          RETURNING *`,
         [
+          input.options?.id ?? null,
           input.name,
           JSON.stringify(input.payload),
           input.options?.runAt ?? null,

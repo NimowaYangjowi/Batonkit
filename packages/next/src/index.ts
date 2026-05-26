@@ -7,10 +7,11 @@ import type {
 export interface ControlPlaneHandlersOptions {
   control: ControlStore;
   secret: string;
+  publicRead?: boolean;
 }
 
 export interface ControlPlaneHandlers {
-  GET: () => Promise<Response>;
+  GET: (request?: Request) => Promise<Response>;
   POST: (request: Request) => Promise<Response>;
 }
 
@@ -32,7 +33,11 @@ export function createControlPlaneHandlers(
   options: ControlPlaneHandlersOptions
 ): ControlPlaneHandlers {
   return {
-    async GET() {
+    async GET(request) {
+      if (!options.publicRead && (!request || !isAuthorized(request, options.secret))) {
+        return jsonResponse({ error: 'unauthorized' }, { status: 401 });
+      }
+
       return jsonResponse(await options.control.getState());
     },
 

@@ -15,3 +15,5 @@ npm install @batonkit/core @batonkit/next
 - `createControlPlaneHandlers(...)` for App Router `GET` and `POST` handlers
 
 Use this when your product is built on Next.js and you want a small, reusable control route instead of hand-writing the request parsing and response logic yourself.
+
+Both `GET` and `POST` require `Authorization: Bearer <secret>` by default. Plain language: the status door and the control door are locked unless you explicitly pass `publicRead: true`.

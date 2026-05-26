@@ -14,6 +14,12 @@ Methods:
 - `fail(id, error)`
 - `get(id)`
 
+`enqueue` options include:
+
+- `id`: optional caller-provided job id
+- `runAt`: optional time when the job becomes claimable
+- `maxAttempts`: optional retry limit
+
 ### `createMemoryStore()`
 
 In-memory `JobStore` for tests and examples.
@@ -50,7 +56,7 @@ Creates a durable `ControlStore` backed by Postgres for ownership and heartbeat 
 
 ### `postgresStore(queryClient)`
 
-Creates a `JobStore` from a minimal query client.
+Creates a `JobStore` from a minimal query client. It preserves caller-provided job ids from `enqueue(..., { id })`.
 
 ## `@batonkit/worker`
 
@@ -81,6 +87,8 @@ Optional heartbeat fields:
 ### `createControlPlaneHandlers({ control, secret })`
 
 Returns `GET` and `POST` handlers compatible with Next.js App Router route files.
+
+`GET` and `POST` require `Authorization: Bearer <secret>` by default. Pass `publicRead: true` only when control-plane state is safe to expose publicly.
 
 ## `@batonkit/provider-railway`
 

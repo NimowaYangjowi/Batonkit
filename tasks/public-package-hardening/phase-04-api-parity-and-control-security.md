@@ -85,16 +85,23 @@ git commit -m "fix: align postgres enqueue ids and secure control reads"
 
 ## Phase Review
 
-- Pending. Complete after implementation.
+- Regression risk: medium. This changes two public surfaces: Postgres enqueue now preserves caller-provided IDs, and control-plane `GET` now requires authorization unless `publicRead` is explicitly enabled.
+- API clarity: improved. `EnqueueOptions.id` is now consistently honored by memory and Postgres stores, and route read security has an explicit `publicRead` opt-in.
+- Overengineering: avoided. The Postgres store uses the existing job ID column and the Next helper uses the existing bearer-secret check.
+- Test gaps: acceptable for this phase. Unit tests cover query-client ID forwarding, unauthorized reads, authorized reads, and explicit public reads. Real Postgres integration covers custom ID round-trip.
+- Docs gaps: addressed in `docs/api-reference.md`, `packages/next/README.md`, and `packages/postgres/README.md`.
+- Performance/cost impact: neutral. The enqueue query shape changes by one optional value and control reads add one header check.
+- Security impact: improved. Operational control-plane state is no longer public by default.
+- Public-package ergonomics: improved because local test behavior now matches Postgres behavior for custom IDs.
+- Later phase update: not required. Phase 05 can still do the broader docs release-readiness pass.
 
 ## Completion Checklist
 
-- [ ] Failing API parity tests written first
-- [ ] Postgres enqueue ID behavior aligned or public option removed
-- [ ] Control-plane read security clarified and tested
-- [ ] Docs updated
-- [ ] Verification commands pass
-- [ ] Phase review completed
-- [ ] Phase committed
-- [ ] Later phase documents updated if needed
-
+- [x] Failing API parity tests written first
+- [x] Postgres enqueue ID behavior aligned or public option removed
+- [x] Control-plane read security clarified and tested
+- [x] Docs updated
+- [x] Verification commands pass
+- [x] Phase review completed
+- [x] Phase committed
+- [x] Later phase documents updated if needed

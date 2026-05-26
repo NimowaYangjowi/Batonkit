@@ -148,6 +148,44 @@ describe('postgres queue package', () => {
 
     expect(job.id).toBe('job_1');
     expect(queries[0]?.text).toContain('INSERT INTO lfw_jobs');
-    expect(queries[0]?.values[0]).toBe('generate-preview');
+    expect(queries[0]?.values[0]).toBeNull();
+    expect(queries[0]?.values[1]).toBe('generate-preview');
+  });
+
+  it('passes caller-provided job ids through the query client', async () => {
+    const queries: Array<{ text: string; values: unknown[] }> = [];
+    const store = postgresStore({
+      query: async (text: string, values: unknown[] = []) => {
+        queries.push({ text, values });
+        return {
+          rows: [
+            {
+              id: 'job_custom_1',
+              name: 'generate-preview',
+              payload: { fileId: 'file_123' },
+              status: 'pending',
+              run_at: new Date('2026-05-25T00:00:00.000Z'),
+              attempts: 0,
+              max_attempts: 3,
+              lease_owner: null,
+              lease_expires_at: null,
+              last_error: null,
+              created_at: new Date('2026-05-25T00:00:00.000Z'),
+              updated_at: new Date('2026-05-25T00:00:00.000Z'),
+            },
+          ],
+        };
+      },
+    });
+
+    const job = await store.enqueue({
+      name: 'generate-preview',
+      payload: { fileId: 'file_123' },
+      options: { id: 'job_custom_1' },
+    });
+
+    expect(job.id).toBe('job_custom_1');
+    expect(queries[0]?.text).toContain('INSERT INTO lfw_jobs');
+    expect(queries[0]?.values[0]).toBe('job_custom_1');
   });
 });

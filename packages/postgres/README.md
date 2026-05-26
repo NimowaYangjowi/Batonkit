@@ -18,3 +18,5 @@ npm install @batonkit/core @batonkit/postgres
 - `createControlPlaneMigrationSql()` for control-plane tables
 
 If you are building the real multi-process setup from the BatonKit Quick Start, this is the package that provides the shared Postgres-backed data layer.
+
+The Postgres queue preserves caller-provided job IDs from `enqueue(..., { id })`, matching the in-memory store behavior.

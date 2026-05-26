@@ -41,6 +41,11 @@ describe.runIf(databaseUrl)('postgres integration', () => {
     const jobs = createJobs({ store: postgresStore(pool) });
 
     const enqueued = await jobs.enqueue('generate-preview', { fileId: 'file_123' });
+    const customIdJob = await jobs.enqueue(
+      'generate-preview',
+      { fileId: 'file_custom' },
+      { id: 'job_custom_integration' }
+    );
     const claimed = await jobs.claimNext({
       workerId: 'office-mac-mini',
       leaseMs: 30_000,
@@ -48,6 +53,8 @@ describe.runIf(databaseUrl)('postgres integration', () => {
     const completed = await jobs.complete(claimed!.id);
 
     expect(enqueued.status).toBe('pending');
+    expect(customIdJob.id).toBe('job_custom_integration');
+    await jobs.complete(customIdJob.id);
     expect(claimed?.id).toBe(enqueued.id);
     expect(claimed?.status).toBe('running');
     expect(completed.status).toBe('completed');
