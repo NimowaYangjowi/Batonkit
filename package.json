@@ -17,6 +17,7 @@
     "test:pack": "node scripts/pack-consumer-smoke.mjs",
     "drill:failover": "node scripts/failover-drill.mjs",
     "drill:railway-live": "node examples/railway-live-drill/dist/drill.js run-local",
+    "drill:railway-live:remote": "node examples/railway-live-drill/dist/drill.js run-remote",
     "drill:railway-live:enqueue": "node examples/railway-live-drill/dist/drill.js enqueue",
     "drill:railway-live:down": "node examples/railway-live-drill/dist/drill.js failover down",
     "drill:railway-live:up": "node examples/railway-live-drill/dist/drill.js failover up",

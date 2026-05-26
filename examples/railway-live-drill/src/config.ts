@@ -57,7 +57,11 @@ export function readDrillConfig(
     env.BATONKIT_PLATFORM,
     options.defaultPlatform ?? 'local'
   );
-  const port = parseNumber(env.BATONKIT_PORT, 3000, 'BATONKIT_PORT');
+  const port = parseNumber(
+    env.BATONKIT_PORT ?? env.PORT,
+    3000,
+    env.BATONKIT_PORT ? 'BATONKIT_PORT' : env.PORT ? 'PORT' : 'BATONKIT_PORT'
+  );
   const failbackCooldownMs = parseNumber(
     env.BATONKIT_FAILBACK_COOLDOWN_MS,
     0,

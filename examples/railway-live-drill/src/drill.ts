@@ -65,6 +65,24 @@ async function expectRunOnceIdle(
   }
 }
 
+async function waitForJobStatus(
+  jobs: ReturnType<typeof createJobs>,
+  jobId: string,
+  expectedStatus: 'completed',
+  label: string
+): Promise<void> {
+  for (let attempt = 0; attempt < 60; attempt += 1) {
+    const job = await jobs.get(jobId);
+    if (job?.status === expectedStatus) {
+      return;
+    }
+
+    await sleep(1_000);
+  }
+
+  throw new Error(`${label} did not reach ${expectedStatus} in time.`);
+}
+
 async function runLocalDrill(): Promise<void> {
   const config = readDrillConfig();
   const localRuntime = await createDrillWorkerRuntime({
@@ -149,6 +167,97 @@ async function runLocalDrill(): Promise<void> {
   }
 }
 
+async function runRemoteDrill(): Promise<void> {
+  const config = readDrillConfig();
+  if (!config.readyUrl) {
+    throw new Error(
+      'BATONKIT_READY_URL is required for the remote Railway live drill.'
+    );
+  }
+
+  const localRuntime = await createDrillWorkerRuntime({
+    ...config,
+    platform: 'local',
+    workerId: 'local-live-drill-worker',
+  });
+  const provider = createBackupProvider(config.readyUrl, config.controlSecret);
+
+  try {
+    await migrateDrillSchema(localRuntime.client);
+    await resetDrillState(localRuntime.client);
+
+    const initial = await localRuntime.control.getState();
+    const jobA = await localRuntime.jobs.enqueue('generate-preview', {
+      fileId: 'live-job-a',
+      screenLabel: 'Live job A',
+    });
+    await expectRunOnceProcessed('local', () => localRuntime.runOnce());
+
+    const failedOver = await applyFailoverEvent({
+      control: localRuntime.control,
+      provider,
+      event: 'down',
+      reason: 'live_drill_down',
+      failbackCooldownMs: config.failbackCooldownMs,
+    });
+
+    const afterDown = await localRuntime.control.getState();
+    const jobB = await localRuntime.jobs.enqueue('generate-preview', {
+      fileId: 'live-job-b',
+      screenLabel: 'Live job B',
+    });
+    await expectRunOnceIdle('local', () => localRuntime.runOnce());
+    await waitForJobStatus(localRuntime.jobs, jobB.id, 'completed', 'Railway backup job B');
+
+    const failbackAttempt = await applyFailoverEvent({
+      control: localRuntime.control,
+      provider,
+      event: 'up',
+      reason: 'live_drill_up',
+      failbackCooldownMs: config.failbackCooldownMs,
+    });
+    const restored =
+      failbackAttempt.action === 'failback_cooldown'
+        ? await applyFailoverEvent({
+            control: localRuntime.control,
+            provider,
+            event: 'up',
+            reason: 'live_drill_up_after_cooldown',
+            observedAt: new Date(Date.now() + config.failbackCooldownMs + 1),
+            failbackCooldownMs: config.failbackCooldownMs,
+          })
+        : failbackAttempt;
+
+    const afterUp = await localRuntime.control.getState();
+    const jobC = await localRuntime.jobs.enqueue('generate-preview', {
+      fileId: 'live-job-c',
+      screenLabel: 'Live job C',
+    });
+    await expectRunOnceProcessed('local', () => localRuntime.runOnce());
+
+    console.info(
+      JSON.stringify(
+        {
+          ok: true,
+          mode: 'remote',
+          readyUrl: config.readyUrl,
+          initialOwner: initial.activeOwner,
+          ownerAfterDown: afterDown.activeOwner,
+          ownerAfterUp: afterUp.activeOwner,
+          jobIds: [jobA.id, jobB.id, jobC.id],
+          failedOver: failedOver.action,
+          restored: restored.action,
+          finalOwner: (await localRuntime.control.getState()).activeOwner,
+        },
+        null,
+        2
+      )
+    );
+  } finally {
+    await localRuntime.close();
+  }
+}
+
 async function enqueueSingleJob(label: string): Promise<void> {
   const config = readDrillConfig();
   const pool = new Pool({ connectionString: config.databaseUrl });
@@ -206,6 +315,11 @@ async function main(): Promise<void> {
 
   if (command === 'run-local') {
     await runLocalDrill();
+    return;
+  }
+
+  if (command === 'run-remote') {
+    await runRemoteDrill();
     return;
   }
 
