@@ -114,6 +114,20 @@ Run a backup worker in the cloud with the same job definitions, but use a gated 
 6. A provider adapter wakes the backup worker.
 7. When local is healthy again, failback waits for a cooldown before returning ownership to `local`.
 
+## Monitoring Dependency
+
+BatonKit is not tied to HetrixTools, UptimeRobot, or any single monitoring dashboard.
+
+Plain language: the package only needs a simple "local machine is down" or "local machine is back" signal. The monitor can be any tool that can send a webhook your app can translate into those two meanings.
+
+The built-in `@batonkit/monitor-webhook` helper accepts generic payloads with either:
+
+- `status: "down" | "failed" | "offline"`
+- `status: "up" | "recovered" | "online"`
+- `event: ...` with the same values
+
+If your monitoring tool sends a different shape, add a tiny adapter in your route handler before calling BatonKit's failover logic.
+
 ## Database Tables
 
 The Postgres helpers create:

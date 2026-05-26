@@ -79,3 +79,8 @@ Creates a backup provider that checks readiness and refreshes the backup worker 
 ### `parseMonitorWebhookEvent(body)`
 
 Parses generic monitor payloads into `down` or `up` failover events.
+
+Supports either `body.status` or `body.event` with values such as:
+
+- down: `down`, `failed`, `offline`
+- up: `up`, `recovered`, `online`
