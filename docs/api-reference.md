@@ -107,6 +107,12 @@ Malformed JSON and invalid request bodies return `400`.
 
 Creates a backup provider that checks readiness and refreshes the backup worker control plane.
 
+`wake()` checks the backup worker's public `/ready` door and then posts to `/control-plane/refresh`.
+
+Plain language: the public ready door only needs to say "the backup worker web service is alive." Detailed ownership state should stay behind the bearer secret.
+
+`park()` also posts to `/control-plane/refresh` so the standby side stays aligned with shared ownership state. It does not suspend the Railway service by itself.
+
 ## `@batonkit/monitor-webhook`
 
 ### `parseMonitorWebhookEvent(body)`

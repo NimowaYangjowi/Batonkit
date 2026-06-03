@@ -154,6 +154,8 @@ The backup worker will stay passive while local ownership is active because `bac
 
 Plain language: the monitor only needs to report "local is back" once. After that, run a small periodic check so BatonKit can hand the baton home when the wait is over.
 
+Provider note: BatonKit always calls the provider's `park()` hook when ownership returns to `local`, but what that means depends on the platform adapter. For example, the Railway adapter currently refreshes the backup worker control door and leaves service suspension or scale-down to Railway-side configuration.
+
 ## Monitoring Dependency
 
 BatonKit is not tied to HetrixTools, UptimeRobot, or any single monitoring dashboard.

@@ -1,11 +1,24 @@
 import { pathToFileURL } from 'node:url';
 
-import { applyFailoverEvent, createJobs, type BackupProvider } from '@batonkit/core';
-import { postgresControlStore, postgresStore } from '@batonkit/postgres';
+import {
+  applyFailoverEvent,
+  createJobs,
+  type ApplyFailoverEventInput,
+  type ApplyFailoverEventResult,
+  type BackupProvider,
+  type ControlStore,
+  type JobsClient,
+  type WorkerPlatform,
+} from '@batonkit/core';
+import {
+  postgresControlStore,
+  postgresStore,
+  type QueryClient,
+} from '@batonkit/postgres';
 import { railwayProvider } from '@batonkit/provider-railway';
 import pg from 'pg';
 
-import { readDrillConfig } from './config.js';
+import { readDrillConfig, type DrillConfig } from './config.js';
 import {
   createDrillWorkerRuntime,
   migrateDrillSchema,
@@ -14,7 +27,36 @@ import {
 
 const { Pool } = pg;
 
-function createBackupProvider(
+export interface DrillSummary {
+  failedOver: ApplyFailoverEventResult['action'];
+  finalOwner: WorkerPlatform;
+  jobIds: string[];
+  mode: 'local' | 'remote';
+  restored: ApplyFailoverEventResult['action'];
+}
+
+interface MinimalRuntime {
+  client: QueryClient;
+  close: () => Promise<void>;
+  control: ControlStore;
+  jobs: JobsClient;
+  runOnce: () => Promise<'processed' | 'idle' | 'stopped'>;
+}
+
+interface LocalDrillDependencies {
+  applyEvent?: (input: ApplyFailoverEventInput) => Promise<ApplyFailoverEventResult>;
+  createProvider?: (
+    readyUrl: string | null,
+    controlSecret: string
+  ) => BackupProvider;
+  createRuntime?: (config: DrillConfig) => Promise<MinimalRuntime>;
+  migrateSchema?: (client: QueryClient) => Promise<void>;
+  resetState?: (client: QueryClient) => Promise<void>;
+}
+
+type RemoteDrillDependencies = LocalDrillDependencies;
+
+export function createBackupProvider(
   readyUrl: string | null,
   controlSecret: string
 ): BackupProvider {
@@ -83,23 +125,31 @@ async function waitForJobStatus(
   throw new Error(`${label} did not reach ${expectedStatus} in time.`);
 }
 
-async function runLocalDrill(): Promise<void> {
-  const config = readDrillConfig();
-  const localRuntime = await createDrillWorkerRuntime({
+export async function runLocalDrillWithConfig(
+  config: DrillConfig,
+  dependencies: LocalDrillDependencies = {}
+): Promise<DrillSummary> {
+  const createRuntime = dependencies.createRuntime ?? createDrillWorkerRuntime;
+  const migrateSchema = dependencies.migrateSchema ?? migrateDrillSchema;
+  const resetState = dependencies.resetState ?? resetDrillState;
+  const applyEvent = dependencies.applyEvent ?? applyFailoverEvent;
+  const providerFactory = dependencies.createProvider ?? createBackupProvider;
+
+  const localRuntime = await createRuntime({
     ...config,
     platform: 'local',
     workerId: 'local-drill-worker',
   });
-  const backupRuntime = await createDrillWorkerRuntime({
+  const backupRuntime = await createRuntime({
     ...config,
     platform: 'backup',
     workerId: 'backup-drill-worker',
   });
-  const provider = createBackupProvider(null, config.controlSecret);
+  const provider = providerFactory(null, config.controlSecret);
 
   try {
-    await migrateDrillSchema(localRuntime.client);
-    await resetDrillState(localRuntime.client);
+    await migrateSchema(localRuntime.client);
+    await resetState(localRuntime.client);
 
     const jobA = await localRuntime.jobs.enqueue('generate-preview', {
       fileId: 'drill-job-a',
@@ -107,7 +157,7 @@ async function runLocalDrill(): Promise<void> {
     });
     await expectRunOnceProcessed('local', () => localRuntime.runOnce());
 
-    const failedOver = await applyFailoverEvent({
+    const failedOver = await applyEvent({
       control: localRuntime.control,
       provider,
       event: 'down',
@@ -122,7 +172,7 @@ async function runLocalDrill(): Promise<void> {
     await expectRunOnceIdle('local', () => localRuntime.runOnce());
     await expectRunOnceProcessed('backup', () => backupRuntime.runOnce());
 
-    const failbackAttempt = await applyFailoverEvent({
+    const failbackAttempt = await applyEvent({
       control: localRuntime.control,
       provider,
       event: 'up',
@@ -131,7 +181,7 @@ async function runLocalDrill(): Promise<void> {
     });
     const restored =
       failbackAttempt.action === 'failback_cooldown'
-        ? await applyFailoverEvent({
+        ? await applyEvent({
             control: localRuntime.control,
             provider,
             event: 'up',
@@ -148,43 +198,45 @@ async function runLocalDrill(): Promise<void> {
     await expectRunOnceIdle('backup', () => backupRuntime.runOnce());
     await expectRunOnceProcessed('local', () => localRuntime.runOnce());
 
-    console.info(
-      JSON.stringify(
-        {
-          ok: true,
-          jobIds: [jobA.id, jobB.id, jobC.id],
-          failedOver: failedOver.action,
-          restored: restored.action,
-          finalOwner: (await localRuntime.control.getState()).activeOwner,
-        },
-        null,
-        2
-      )
-    );
+    return {
+      mode: 'local',
+      jobIds: [jobA.id, jobB.id, jobC.id],
+      failedOver: failedOver.action,
+      restored: restored.action,
+      finalOwner: (await localRuntime.control.getState()).activeOwner,
+    };
   } finally {
     await backupRuntime.close();
     await localRuntime.close();
   }
 }
 
-async function runRemoteDrill(): Promise<void> {
-  const config = readDrillConfig();
+export async function runRemoteDrillWithConfig(
+  config: DrillConfig,
+  dependencies: RemoteDrillDependencies = {}
+): Promise<DrillSummary & { initialOwner: WorkerPlatform; ownerAfterDown: WorkerPlatform; ownerAfterUp: WorkerPlatform; readyUrl: string; }> {
   if (!config.readyUrl) {
     throw new Error(
       'BATONKIT_READY_URL is required for the remote Railway live drill.'
     );
   }
 
-  const localRuntime = await createDrillWorkerRuntime({
+  const createRuntime = dependencies.createRuntime ?? createDrillWorkerRuntime;
+  const migrateSchema = dependencies.migrateSchema ?? migrateDrillSchema;
+  const resetState = dependencies.resetState ?? resetDrillState;
+  const applyEvent = dependencies.applyEvent ?? applyFailoverEvent;
+  const providerFactory = dependencies.createProvider ?? createBackupProvider;
+
+  const localRuntime = await createRuntime({
     ...config,
     platform: 'local',
     workerId: 'local-live-drill-worker',
   });
-  const provider = createBackupProvider(config.readyUrl, config.controlSecret);
+  const provider = providerFactory(config.readyUrl, config.controlSecret);
 
   try {
-    await migrateDrillSchema(localRuntime.client);
-    await resetDrillState(localRuntime.client);
+    await migrateSchema(localRuntime.client);
+    await resetState(localRuntime.client);
 
     const initial = await localRuntime.control.getState();
     const jobA = await localRuntime.jobs.enqueue('generate-preview', {
@@ -193,7 +245,7 @@ async function runRemoteDrill(): Promise<void> {
     });
     await expectRunOnceProcessed('local', () => localRuntime.runOnce());
 
-    const failedOver = await applyFailoverEvent({
+    const failedOver = await applyEvent({
       control: localRuntime.control,
       provider,
       event: 'down',
@@ -209,7 +261,7 @@ async function runRemoteDrill(): Promise<void> {
     await expectRunOnceIdle('local', () => localRuntime.runOnce());
     await waitForJobStatus(localRuntime.jobs, jobB.id, 'completed', 'Railway backup job B');
 
-    const failbackAttempt = await applyFailoverEvent({
+    const failbackAttempt = await applyEvent({
       control: localRuntime.control,
       provider,
       event: 'up',
@@ -218,7 +270,7 @@ async function runRemoteDrill(): Promise<void> {
     });
     const restored =
       failbackAttempt.action === 'failback_cooldown'
-        ? await applyFailoverEvent({
+        ? await applyEvent({
             control: localRuntime.control,
             provider,
             event: 'up',
@@ -235,24 +287,17 @@ async function runRemoteDrill(): Promise<void> {
     });
     await expectRunOnceProcessed('local', () => localRuntime.runOnce());
 
-    console.info(
-      JSON.stringify(
-        {
-          ok: true,
-          mode: 'remote',
-          readyUrl: config.readyUrl,
-          initialOwner: initial.activeOwner,
-          ownerAfterDown: afterDown.activeOwner,
-          ownerAfterUp: afterUp.activeOwner,
-          jobIds: [jobA.id, jobB.id, jobC.id],
-          failedOver: failedOver.action,
-          restored: restored.action,
-          finalOwner: (await localRuntime.control.getState()).activeOwner,
-        },
-        null,
-        2
-      )
-    );
+    return {
+      mode: 'remote',
+      readyUrl: config.readyUrl,
+      initialOwner: initial.activeOwner,
+      ownerAfterDown: afterDown.activeOwner,
+      ownerAfterUp: afterUp.activeOwner,
+      jobIds: [jobA.id, jobB.id, jobC.id],
+      failedOver: failedOver.action,
+      restored: restored.action,
+      finalOwner: (await localRuntime.control.getState()).activeOwner,
+    };
   } finally {
     await localRuntime.close();
   }
@@ -312,14 +357,15 @@ async function applyManualFailover(event: 'down' | 'up'): Promise<void> {
 
 async function main(): Promise<void> {
   const command = process.argv[2] ?? 'run-local';
+  const config = readDrillConfig();
 
   if (command === 'run-local') {
-    await runLocalDrill();
+    console.info(JSON.stringify(await runLocalDrillWithConfig(config), null, 2));
     return;
   }
 
   if (command === 'run-remote') {
-    await runRemoteDrill();
+    console.info(JSON.stringify(await runRemoteDrillWithConfig(config), null, 2));
     return;
   }
 

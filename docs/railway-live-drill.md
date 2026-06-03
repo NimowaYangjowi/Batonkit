@@ -33,6 +33,12 @@ Run the real Railway-backed drill:
 npm run drill:railway-live:remote
 ```
 
+Run the automated drill checks:
+
+```bash
+npm run test -- examples/railway-live-drill/src/server.test.ts examples/railway-live-drill/src/drill.test.ts
+```
+
 Run a local worker:
 
 ```bash
@@ -107,6 +113,20 @@ railway domain --service backup-worker
 curl https://backup-worker-production-f754.up.railway.app/ready
 ```
 
+The public readiness response is intentionally minimal:
+
+```json
+{ "ok": true }
+```
+
+Use the bearer secret only when you need the detailed ownership snapshot:
+
+```bash
+curl -H "Authorization: Bearer $BATONKIT_CONTROL_SECRET" https://backup-worker-production-f754.up.railway.app/ready
+```
+
+Plain language: the public door only shows a green light. The private door shows the dashboard with worker name and baton owner.
+
 ## Observed Execution
 
 Observed on 2026-05-26:
@@ -121,6 +141,24 @@ Observed on 2026-05-26:
 - `npm run drill:railway-live:remote` completed successfully
 
 Plain language: the real Railway backup worker has now been proven. It took the baton for the middle drill job and then gave it back to the local worker.
+
+## Automated Coverage
+
+The repository now automatically checks:
+
+- the public backup worker `/ready` endpoint returns only a minimal health response
+- the authorized backup worker `/ready` endpoint returns the detailed ownership snapshot
+- the authorized `/ready` endpoint rejects the wrong bearer secret
+- the `/control-plane/refresh` endpoint rejects the wrong bearer secret
+- the same refresh endpoint accepts the correct bearer secret and records a heartbeat
+- refresh heartbeats preserve a degraded worker status instead of overwriting it as healthy
+- both drill server doors return readable `500` JSON when the control-plane state cannot be read or refreshed
+- the local practice drill hands the middle job from the local worker to the backup worker and back
+- the remote drill waits for the backup worker to finish the middle job before returning ownership
+
+Plain language: BatonKit now tests the important doors and baton handoff steps automatically, not just by manual rehearsal.
+
+Provider note: in the Railway adapter, `park()` means "refresh the standby control-plane door again." It does not shut the Railway service down by itself.
 
 ## Known Limitations
 

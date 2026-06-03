@@ -1,6 +1,14 @@
 import { pathToFileURL } from 'node:url';
 
-import { createGatedStore, createJobs, type ControlState, type WorkerPlatform } from '@batonkit/core';
+import {
+  createGatedStore,
+  createJobs,
+  type ControlStore,
+  type ControlState,
+  type RecordHeartbeatInput,
+  type WorkerHealthStatus,
+  type WorkerPlatform,
+} from '@batonkit/core';
 import {
   createControlPlaneMigrationSql,
   createQueueMigrationSql,
@@ -26,6 +34,24 @@ export interface DrillWorkerRuntime {
   start: () => Promise<void>;
   stop: () => Promise<void>;
   workerId: string;
+}
+
+export function createHeartbeatStatusMirror(control: ControlStore): {
+  control: ControlStore;
+  getStatus: () => WorkerHealthStatus;
+} {
+  let currentStatus: WorkerHealthStatus = 'ok';
+
+  return {
+    control: {
+      ...control,
+      recordHeartbeat(input: RecordHeartbeatInput): Promise<ControlState> {
+        currentStatus = input.status ?? 'ok';
+        return control.recordHeartbeat(input);
+      },
+    },
+    getStatus: () => currentStatus,
+  };
 }
 
 function createConsoleLogger(platform: WorkerPlatform, workerId: string) {
@@ -65,8 +91,11 @@ export async function createDrillWorkerRuntime(
   const control = postgresControlStore(pool);
   const jobs = createJobs({ store: postgresStore(pool) });
   const store = createGatedStore(postgresStore(pool), control, config.platform);
+  const heartbeatMirror = createHeartbeatStatusMirror(control);
   const worker = createWorker({
     store,
+    control: heartbeatMirror.control,
+    platform: config.platform,
     workerId: config.workerId,
     jobs: [
       defineJob('generate-preview', async (payload, context) => {
@@ -77,25 +106,21 @@ export async function createDrillWorkerRuntime(
         });
       }),
     ],
+    heartbeatIntervalMs: 5_000,
     pollIntervalMs: 250,
     logger: createConsoleLogger(config.platform, config.workerId),
   });
-  let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   let started = false;
 
   async function recordHeartbeat(): Promise<ControlState> {
     return control.recordHeartbeat({
       platform: config.platform,
       workerId: config.workerId,
-      status: 'ok',
+      status: heartbeatMirror.getStatus(),
     });
   }
 
   async function stop(): Promise<void> {
-    if (heartbeatTimer) {
-      clearInterval(heartbeatTimer);
-      heartbeatTimer = null;
-    }
     started = false;
     await worker.stop();
   }
@@ -124,12 +149,6 @@ export async function createDrillWorkerRuntime(
         return;
       }
 
-      await recordHeartbeat();
-      heartbeatTimer = setInterval(() => {
-        void recordHeartbeat().catch((error: unknown) => {
-          console.error(`[${config.platform}:${config.workerId}] Heartbeat failed`, error);
-        });
-      }, 5_000);
       started = true;
       await worker.start();
     },

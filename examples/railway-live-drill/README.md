@@ -34,6 +34,12 @@ Run the real Railway-backed drill after the backup worker is deployed:
 npm run drill:railway-live:remote
 ```
 
+Run the automated drill checks:
+
+```bash
+npm run test -- examples/railway-live-drill/src/server.test.ts examples/railway-live-drill/src/drill.test.ts
+```
+
 Run a local worker process against the shared Postgres queue:
 
 ```bash
@@ -45,6 +51,16 @@ Run the backup HTTP service that Railway should expose:
 ```bash
 BATONKIT_PLATFORM=backup node examples/railway-live-drill/dist/server.js
 ```
+
+Check the public readiness door:
+
+```bash
+curl "$BATONKIT_READY_URL"
+```
+
+This returns only `{ "ok": true }`. Add `Authorization: Bearer $BATONKIT_CONTROL_SECRET` when you need the detailed ownership snapshot.
+
+Plain language: the public web door only says whether the backup worker is awake. The secret request shows the private control-room details.
 
 Enqueue one harmless test job:
 
@@ -58,3 +74,7 @@ Trigger failover or failback using the shared control store and optional Railway
 node examples/railway-live-drill/dist/drill.js failover down
 node examples/railway-live-drill/dist/drill.js failover up
 ```
+
+Plain language: the harness now has automated tests for both the backup worker web door and the baton handoff rehearsal, so those steps no longer rely only on manual watching.
+
+Provider note: in this Railway drill harness, `park()` does not turn the backup service off. It only refreshes the standby worker's control-plane door so the baton state stays accurate.

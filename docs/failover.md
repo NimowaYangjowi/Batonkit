@@ -13,7 +13,7 @@ Plain language: the local machine normally holds the baton. If it disappears, th
 5. Monitor reports local worker `up`.
 6. Failback cooldown starts.
 7. A scheduled reconciliation call checks whether the cooldown has elapsed.
-8. After cooldown, ownership returns to `local` and the provider parks the backup worker.
+8. After cooldown, ownership returns to `local` and the provider runs its `park()` step to put the backup side back into standby if that provider supports it.
 
 Plain language: the monitor only needs to say "local is back" once. After that, your app or worker should periodically call `reconcileFailback(...)`, like checking whether a kitchen timer has finished.
 
@@ -25,6 +25,8 @@ Providers implement:
 - `park()`
 
 Railway is the first provider, but the interface is intentionally generic.
+
+Plain language: `park()` means "do the provider-specific standby step now." On some platforms that could eventually suspend or scale down the backup side. On Railway today, BatonKit does not turn the service off by itself. The Railway adapter only refreshes the backup worker's control-plane door so the standby side stays in sync.
 
 ## Monitor Webhooks
 
