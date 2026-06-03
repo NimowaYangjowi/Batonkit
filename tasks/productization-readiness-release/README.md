@@ -34,11 +34,19 @@ Plain language: the user should be able to copy the setup, run the checks, and k
 
 ## Phase Index
 
-1. `phase-01-branch-and-baseline-state.md`
-2. `phase-02-control-route-secret-safety.md`
-3. `phase-03-required-verification-gates.md`
-4. `phase-04-release-metadata-and-beta-docs.md`
-5. `phase-05-ship-pr-and-productization-decision.md`
+1. `phase-01-branch-and-baseline-state.md` - complete
+2. `phase-02-control-route-secret-safety.md` - complete
+3. `phase-03-required-verification-gates.md` - complete
+4. `phase-04-release-metadata-and-beta-docs.md` - complete
+5. `phase-05-ship-pr-and-productization-decision.md` - complete
+
+## Final Decision
+
+Decision on 2026-06-04: **public beta ready**, not production-stable.
+
+PR: https://github.com/NimowaYangjowi/Batonkit/pull/1
+
+Plain language: BatonKit is ready for careful beta testers to review and install, but it should not be described as fully production-stable yet. Stable release should wait for real adopter feedback and stronger operations runbooks.
 
 ## Cross-Phase Verification
 
