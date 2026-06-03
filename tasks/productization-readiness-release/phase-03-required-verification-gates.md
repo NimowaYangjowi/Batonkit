@@ -94,15 +94,15 @@ If no docs outside this phase changed, commit only this phase document.
 
 ## Phase Review
 
-- Status: blocked on remote Railway-backed drill credentials.
+- Status: blocked on Railway Postgres service availability and Railway database-provisioning permission.
 - Regression risk: low so far. Verification commands exercised existing queue, package, Postgres, and failover behavior without introducing code changes in this phase.
 - API clarity: unchanged. No public API behavior changed in this phase.
 - Overengineering: avoided. The local live-drill harness used an isolated temporary Docker Postgres database rather than adding a new test path.
 - Test gaps: one required release gate remains unverified: `npm run drill:railway-live:remote`.
-- Docs gaps: this document now records which gates passed and which environment values are still required.
+- Docs gaps: this document now records which gates passed, which generated values were set, and which Railway service issue still blocks remote proof.
 - Performance/cost impact: neutral. Temporary Docker Postgres was used for verification and stopped after the local drill.
 - Security impact: neutral. A test-only local drill secret was used and no secrets were committed.
-- Public-package ergonomics: improved because the real blocker is now explicit: remote Railway proof needs operator-provided env.
+- Public-package ergonomics: improved because the real blocker is now explicit: remote Railway proof needs a working Railway Postgres service, not just generated env values.
 - Later phase update: Phase 04 release metadata must not claim public beta readiness until the remote Railway-backed drill passes or the decision is explicitly downgraded to private preview only.
 
 ## Completion Notes
@@ -126,17 +126,34 @@ restored: restored_local
 finalOwner: local
 ```
 
-- Remote Railway-backed drill blocker:
+- Initial remote Railway-backed drill blocker:
 
 ```text
 Missing required BatonKit env var: BATONKIT_CONTROL_SECRET
 ```
 
-- Required values to continue:
+- Follow-up on 2026-06-04:
+
+- Generated a new test-only `BATONKIT_CONTROL_SECRET`.
+- Set `backup-worker` Railway variables for `BATONKIT_CONTROL_SECRET`, `BATONKIT_PLATFORM=backup`, `BATONKIT_FAILBACK_COOLDOWN_MS=0`, and `BATONKIT_DATABASE_URL`.
+- First set `BATONKIT_DATABASE_URL` to `${{Postgres.DATABASE_URL}}`; deployment failed because the backup worker could not resolve `postgres.railway.internal`.
+- Then set `BATONKIT_DATABASE_URL` to `${{Postgres.DATABASE_PUBLIC_URL}}`; deployment still failed because Postgres public proxy connections returned `ECONNRESET`.
+- Verified locally with Node `pg` that `DATABASE_PUBLIC_URL` also returns `ECONNRESET`, so the failure is not limited to the backup worker container.
+- `railway service status --service Postgres` reports `No deployment`.
+- `railway service restart --service Postgres --yes` and `railway service redeploy --service Postgres --yes` both report `No deployment found for service`.
+- Attempting to add a new Railway Postgres database with `railway add --database postgres --json` failed with:
+
+```text
+Unauthorized. Please run `railway login` again.
+```
+
+- Current blocker: Railway CLI can read and update the existing lab project, but cannot provision a replacement Postgres database, and the existing Postgres service cannot be restarted or redeployed through CLI because it has no deployment.
+
+Required state to continue:
 
 ```bash
-export BATONKIT_CONTROL_SECRET=<test-only remote refresh secret>
-export BATONKIT_DATABASE_URL=<isolated drill postgres url>
+export BATONKIT_CONTROL_SECRET=<test-only remote refresh secret already set on backup-worker>
+export BATONKIT_DATABASE_URL=<working Railway Postgres public url>
 export BATONKIT_READY_URL=<deployed backup worker ready url>
 ```
 
