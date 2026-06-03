@@ -94,18 +94,62 @@ If no docs outside this phase changed, commit only this phase document.
 
 ## Phase Review
 
-- Pending.
+- Status: blocked on remote Railway-backed drill credentials.
+- Regression risk: low so far. Verification commands exercised existing queue, package, Postgres, and failover behavior without introducing code changes in this phase.
+- API clarity: unchanged. No public API behavior changed in this phase.
+- Overengineering: avoided. The local live-drill harness used an isolated temporary Docker Postgres database rather than adding a new test path.
+- Test gaps: one required release gate remains unverified: `npm run drill:railway-live:remote`.
+- Docs gaps: this document now records which gates passed and which environment values are still required.
+- Performance/cost impact: neutral. Temporary Docker Postgres was used for verification and stopped after the local drill.
+- Security impact: neutral. A test-only local drill secret was used and no secrets were committed.
+- Public-package ergonomics: improved because the real blocker is now explicit: remote Railway proof needs operator-provided env.
+- Later phase update: Phase 04 release metadata must not claim public beta readiness until the remote Railway-backed drill passes or the decision is explicitly downgraded to private preview only.
+
+## Completion Notes
+
+- Docker Desktop was initially installed but the daemon was not ready. It was started with `open -a Docker`, then Docker became available.
+- Verification commands:
+
+```bash
+npm run test:postgres          # passed: 1 integration file, 2 tests
+npm run test:pack              # passed
+npm run drill:failover         # passed
+npm run drill:railway-live     # passed with temporary local Docker Postgres
+npm run drill:railway-live:remote # blocked: missing BATONKIT_CONTROL_SECRET
+```
+
+- Local Railway drill evidence:
+
+```text
+failedOver: failed_over
+restored: restored_local
+finalOwner: local
+```
+
+- Remote Railway-backed drill blocker:
+
+```text
+Missing required BatonKit env var: BATONKIT_CONTROL_SECRET
+```
+
+- Required values to continue:
+
+```bash
+export BATONKIT_CONTROL_SECRET=<test-only remote refresh secret>
+export BATONKIT_DATABASE_URL=<isolated drill postgres url>
+export BATONKIT_READY_URL=<deployed backup worker ready url>
+```
 
 ## Completion Checklist
 
-- [ ] Docker-backed Postgres integration passes
-- [ ] Pack consumer smoke passes
-- [ ] Simulated failover drill passes
-- [ ] Local Railway live drill passes
+- [x] Docker-backed Postgres integration passes
+- [x] Pack consumer smoke passes
+- [x] Simulated failover drill passes
+- [x] Local Railway live drill passes
 - [ ] Remote Railway live drill passes
-- [ ] Verification evidence recorded
-- [ ] Secrets checked before commit
-- [ ] Phase review completed
-- [ ] Phase document updated
-- [ ] Later phase documents updated if needed
-- [ ] Phase committed
+- [x] Verification evidence recorded
+- [x] Secrets checked before commit
+- [x] Phase review completed
+- [x] Phase document updated
+- [x] Later phase documents updated if needed
+- [x] Phase committed
