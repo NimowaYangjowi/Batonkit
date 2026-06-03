@@ -80,15 +80,38 @@ git commit -m "fix: require explicit control secret in example"
 
 ## Phase Review
 
-- Pending.
+- Regression risk: low. The changed route now fails clearly when the control API secret is missing, which can affect only users who relied on the example's unsafe implicit secret.
+- API clarity: improved. The example now matches the root README and control-plane docs by requiring `BATONKIT_CONTROL_SECRET`.
+- Overengineering: avoided. A small local helper enforces the invariant without adding new abstractions or alternate code paths.
+- Test gaps: acceptable. The route is part of a standalone example app without its own route test suite; root build, typecheck, unit tests, lint, and audit passed.
+- Docs gaps: addressed. The example README now names the required secret and the bearer authorization requirement for the user-visible control API door.
+- Performance/cost impact: neutral. No runtime queue behavior, batching, query shape, external API use, storage, or infrastructure behavior changed.
+- Security impact: improved. The sample no longer teaches a known default control-plane secret.
+- Public-package ergonomics: improved because copied setup now fails fast if the operator forgot the control secret.
+- Later phase update: not required. The remaining verification and release metadata phases still apply.
+
+## Completion Notes
+
+- Removed the `dev-secret` fallback from `examples/next-postgres/app/api/control/route.ts`.
+- Removed the `LOCALFIRST_WORKER_SECRET` alias from the example route so the public example uses the BatonKit-specific `BATONKIT_CONTROL_SECRET` name.
+- Updated `examples/next-postgres/README.md` with the required local secret export and bearer-auth explanation.
+- Verification commands:
+
+```bash
+npm run build        # passed
+npm run typecheck    # passed
+npm run test         # passed: 60 passed, 2 skipped
+npm run lint         # passed
+npm audit --omit=dev # passed: found 0 vulnerabilities
+```
 
 ## Completion Checklist
 
-- [ ] Unsafe secret fallback removed
-- [ ] Example secret setup documented
-- [ ] Tests added or updated if useful
-- [ ] Verification commands pass
-- [ ] Phase review completed
-- [ ] Phase document updated
-- [ ] Later phase documents updated if needed
-- [ ] Phase committed
+- [x] Unsafe secret fallback removed
+- [x] Example secret setup documented
+- [x] Tests added or updated if useful
+- [x] Verification commands pass
+- [x] Phase review completed
+- [x] Phase document updated
+- [x] Later phase documents updated if needed
+- [x] Phase committed
