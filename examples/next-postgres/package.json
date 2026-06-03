@@ -1,6 +1,6 @@
 {
   "name": "batonkit-next-postgres-example",
-  "version": "0.0.0",
+  "version": "0.1.0-beta.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,9 +13,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@batonkit/core": "0.0.0",
-    "@batonkit/next": "0.0.0",
-    "@batonkit/worker": "0.0.0",
+    "@batonkit/core": "0.1.0-beta.0",
+    "@batonkit/next": "0.1.0-beta.0",
+    "@batonkit/worker": "0.1.0-beta.0",
     "next": "^16.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

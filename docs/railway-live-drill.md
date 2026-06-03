@@ -9,9 +9,9 @@ Plain language: this is the checklist for making sure the cloud backup worker ca
 - Local harness proof: complete
 - Railway project: `batonkit-lab`
 - Railway backup service: `backup-worker`
-- Railway Postgres: complete
+- Railway Postgres: complete with `Postgres-jw1q`
 - Public backup URL: `https://backup-worker-production-f754.up.railway.app`
-- Live Railway failover evidence: complete on 2026-05-26
+- Live Railway failover evidence: complete on 2026-05-26 and refreshed on 2026-06-04
 
 ## Harness Commands
 
@@ -142,6 +142,18 @@ Observed on 2026-05-26:
 
 Plain language: the real Railway backup worker has now been proven. It took the baton for the middle drill job and then gave it back to the local worker.
 
+Observed on 2026-06-04:
+
+- Existing Railway CLI access could update variables and deploy `backup-worker`, but could not provision a replacement Postgres service.
+- The original `Postgres` service reported no deployment and could not be restarted or redeployed through CLI.
+- A replacement Railway Postgres service, `Postgres-jw1q`, was created from the logged-in Railway dashboard.
+- The replacement database accepted a local `select 1` probe through Railway's public TCP proxy.
+- `backup-worker` was redeployed with `BATONKIT_DATABASE_URL=${{Postgres-jw1q.DATABASE_URL}}` and reached `SUCCESS`.
+- `curl https://backup-worker-production-f754.up.railway.app/ready` returned `{ "ok": true }`.
+- `npm run drill:railway-live:remote` completed successfully with ownership moving `local -> backup -> local`.
+
+Plain language: when the old lab database door was broken, a new lab database was created and the full baton handoff was proven again.
+
 ## Automated Coverage
 
 The repository now automatically checks:
@@ -176,3 +188,8 @@ After the live drill is complete, either:
 Current decision on 2026-05-26:
 
 - retain `batonkit-lab` for repeatable BatonKit release checks
+
+Current decision on 2026-06-04:
+
+- retain `Postgres-jw1q` for repeatable BatonKit release checks
+- clean up or explicitly retain the old offline `Postgres` service in the Railway lab project

@@ -170,9 +170,9 @@ The built-in `@batonkit/monitor-webhook` helper accepts generic payloads with ei
 
 If your monitoring tool sends a different shape, add a tiny adapter in your route handler before calling BatonKit's failover logic.
 
-## Known Preview Limitations
+## Known Beta Limitations
 
-- BatonKit is still a developer preview, not a production-stable queue system.
+- BatonKit is a public beta candidate, not a production-stable queue system.
 - You must run the migration SQL yourself before enqueueing jobs.
 - You must wire the monitor webhook and call `applyFailoverEvent(...)` from your app.
 - You must run a periodic `reconcileFailback(...)` call if you use non-zero failback cooldowns.
@@ -234,9 +234,9 @@ npm run drill:railway-live:remote
 
 ## Current Maturity
 
-BatonKit is not production-stable yet. It is a developer-preview package skeleton with passing unit tests, real Postgres integration coverage, pack smoke tests, a simulated failover drill, a reusable Railway live drill harness, and a completed Railway lab proof run.
+BatonKit is ready for public beta review as `0.1.0-beta.0`. It is not production-stable yet, but it now has passing unit tests, real Postgres integration coverage, pack smoke tests, a simulated failover drill, a reusable Railway live drill harness, and completed Railway lab proof runs.
 
-Before a public beta, rerun the Railway-backed drill in your own environment and review the public API names.
+Before production use, rerun the Railway-backed drill in your own environment, review the public API names against your app's needs, and confirm your monitor, migrations, worker process manager, and failback scheduler are wired.
 
 ## Example
 
