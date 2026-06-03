@@ -94,16 +94,16 @@ If no docs outside this phase changed, commit only this phase document.
 
 ## Phase Review
 
-- Status: blocked on Railway Postgres service availability and Railway database-provisioning permission.
-- Regression risk: low so far. Verification commands exercised existing queue, package, Postgres, and failover behavior without introducing code changes in this phase.
+- Status: complete. Remote Railway-backed failover proof now passes against `backup-worker` and the new `Postgres-jw1q` lab database.
+- Regression risk: low. Verification commands exercised existing queue, package, Postgres, and failover behavior without introducing code changes in this phase.
 - API clarity: unchanged. No public API behavior changed in this phase.
 - Overengineering: avoided. The local live-drill harness used an isolated temporary Docker Postgres database rather than adding a new test path.
-- Test gaps: one required release gate remains unverified: `npm run drill:railway-live:remote`.
-- Docs gaps: this document now records which gates passed, which generated values were set, and which Railway service issue still blocks remote proof.
-- Performance/cost impact: neutral. Temporary Docker Postgres was used for verification and stopped after the local drill.
-- Security impact: neutral. A test-only local drill secret was used and no secrets were committed.
-- Public-package ergonomics: improved because the real blocker is now explicit: remote Railway proof needs a working Railway Postgres service, not just generated env values.
-- Later phase update: Phase 04 release metadata must not claim public beta readiness until the remote Railway-backed drill passes or the decision is explicitly downgraded to private preview only.
+- Test gaps: addressed for the planned gates. Docker-backed Postgres integration, pack smoke, simulated failover, local Railway drill, and remote Railway drill all passed.
+- Docs gaps: this document now records the original blockers, the dashboard-created replacement Postgres service, and the final remote proof result.
+- Performance/cost impact: small lab infrastructure impact. A new Railway Postgres service, `Postgres-jw1q`, was created for repeatable release checks; the old offline `Postgres` service remains in the lab project and should be cleaned up or explicitly retained.
+- Security impact: neutral. Test-only secrets were generated and set through Railway variables; no secret values were committed.
+- Public-package ergonomics: improved because the package now has current live provider proof, not only a historical 2026-05-26 proof.
+- Later phase update: Phase 04 may now update beta readiness language using the completed remote Railway proof.
 
 ## Completion Notes
 
@@ -115,7 +115,7 @@ npm run test:postgres          # passed: 1 integration file, 2 tests
 npm run test:pack              # passed
 npm run drill:failover         # passed
 npm run drill:railway-live     # passed with temporary local Docker Postgres
-npm run drill:railway-live:remote # blocked: missing BATONKIT_CONTROL_SECRET
+npm run drill:railway-live:remote # passed after Railway Postgres replacement
 ```
 
 - Local Railway drill evidence:
@@ -149,12 +149,35 @@ Unauthorized. Please run `railway login` again.
 
 - Current blocker: Railway CLI can read and update the existing lab project, but cannot provision a replacement Postgres database, and the existing Postgres service cannot be restarted or redeployed through CLI because it has no deployment.
 
-Required state to continue:
+- Dashboard follow-up on 2026-06-04:
+
+- Used the logged-in Railway dashboard through Codex Chrome Extension to add a new PostgreSQL database service.
+- New lab database service: `Postgres-jw1q`.
+- Verified `Postgres-jw1q` status: `SUCCESS`.
+- Verified new public Postgres proxy locally with Node `pg`: `select 1` returned `ok=1`.
+- Set `backup-worker` `BATONKIT_DATABASE_URL` to `${{Postgres-jw1q.DATABASE_URL}}`.
+- Redeployed `backup-worker`; deployment `02779f06-72cd-4b89-81a6-298ace3efc4c` reached `SUCCESS`.
+- Verified public readiness:
 
 ```bash
-export BATONKIT_CONTROL_SECRET=<test-only remote refresh secret already set on backup-worker>
-export BATONKIT_DATABASE_URL=<working Railway Postgres public url>
-export BATONKIT_READY_URL=<deployed backup worker ready url>
+curl https://backup-worker-production-f754.up.railway.app/ready
+# {"ok":true}
+```
+
+- Remote Railway drill result:
+
+```text
+mode: remote
+initialOwner: local
+ownerAfterDown: backup
+ownerAfterUp: local
+failedOver: failed_over
+restored: restored_local
+finalOwner: local
+jobIds:
+- job_f294c837-9a3b-4984-a76a-ee196ed01892
+- job_964c4073-11fe-4a7a-9257-5bb6ce65fe35
+- job_85d1e0a8-31b5-47d0-af9a-1151fbedebaf
 ```
 
 ## Completion Checklist
@@ -163,7 +186,7 @@ export BATONKIT_READY_URL=<deployed backup worker ready url>
 - [x] Pack consumer smoke passes
 - [x] Simulated failover drill passes
 - [x] Local Railway live drill passes
-- [ ] Remote Railway live drill passes
+- [x] Remote Railway live drill passes
 - [x] Verification evidence recorded
 - [x] Secrets checked before commit
 - [x] Phase review completed
