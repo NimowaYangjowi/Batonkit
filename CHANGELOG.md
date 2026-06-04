@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-This project is in public beta candidate status.
+This project is being prepared for stable `1.0.0` publication.
+
+## 1.0.0 - 2026-06-04
+
+- Promoted BatonKit to the first stable release version.
+- Confirmed the public worker package name as `@batonkit/worker`.
+- Kept the `@batonkit` package scope for all public packages.
+- Retained the tested local-first queue, Postgres store, worker runtime, Next.js control-plane helpers, Railway provider adapter, and monitor webhook parser.
+- Preserved the stable security posture: explicit control secrets, private control-plane reads by default, and minimal public backup readiness responses.
+- Preserved stable failover behavior: job-name claim scoping, degraded worker heartbeats, duplicate job ID parity, failback reconciliation, local and remote Railway drills, and pack consumer smoke coverage.
+- Publish blocker: actual npm registration still requires npm login and confirmed `@batonkit` scope permission.
 
 ## 0.1.0-beta.0 - 2026-06-04
 

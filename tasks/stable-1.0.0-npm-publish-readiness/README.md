@@ -16,11 +16,11 @@ Plain language: this plan changes the box label from "test version" to "real fir
 - Publish mode: stable npm publish, not beta-tagged prerelease
 - No npm publish should happen until npm login and scope ownership are confirmed.
 
-## Current Known State
+## Initial Known State
 
 - Branch: `codex/productization-readiness`
 - Existing PR: https://github.com/NimowaYangjowi/Batonkit/pull/1
-- Current package version: `0.1.0-beta.0`
+- Initial package version before Phase 02: `0.1.0-beta.0`
 - `npm whoami` currently fails with `ENEEDAUTH`, so this machine is not logged in to npm.
 - Registry lookup returned `E404` for the public package names checked:
   - `@batonkit/core`
@@ -31,6 +31,11 @@ Plain language: this plan changes the box label from "test version" to "real fir
   - `@batonkit/monitor-webhook`
 
 Plain language: the names look unused from public lookup, but the account key for publishing is not installed on this machine yet.
+
+## Progress
+
+- Phase 01 complete: registry lookup and npm auth blocker recorded.
+- Phase 02 complete: package metadata and release docs moved to stable `1.0.0`.
 
 ## Phase Index
 
@@ -72,4 +77,3 @@ Plain language: before calling this stable, prove the package builds, installs, 
 - Do not add app-specific job names, table names, UI concepts, or secrets to public packages.
 - Do not add database triggers or hidden database-side automation.
 - Do not add fallback code to hide missing secrets, missing state, invalid schemas, or failed provider calls.
-

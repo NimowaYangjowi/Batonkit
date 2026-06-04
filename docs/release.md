@@ -1,8 +1,8 @@
 # Release Process
 
-This project is a public beta candidate at `0.1.0-beta.0`.
+This project is being prepared for stable `1.0.0` publication.
 
-Plain language: BatonKit is ready for beta reviewers to install and test, but it is not yet a promise that every production edge case is covered.
+Plain language: BatonKit is moving from a test label to the first official npm release label. The code can be prepared now, but actual npm registration still needs a logged-in npm account with `@batonkit` scope permission.
 
 ## Versioning
 
@@ -12,7 +12,7 @@ Use semantic versioning for public releases:
 - minor: new APIs that are backward compatible
 - major: breaking API or schema changes
 
-Use npm prerelease tags such as `0.1.0-beta.0` until the project is ready to remove beta warnings.
+Use stable versions such as `1.0.0` for npm `latest` publication. Use prerelease tags only for future preview work.
 
 ## Pre-Publish Checks
 
@@ -33,23 +33,20 @@ npm audit --omit=dev
 
 Packages should be published under the `@batonkit` scope.
 
-Publish beta packages with an npm beta tag only after:
+Publish stable packages with the default npm tag only after:
 
 - live Postgres integration tests pass
 - `npm pack` consumer smoke tests pass
 - failover drill passes
-- public API names have been reviewed
+- public API names have been reviewed and `@batonkit/worker` is confirmed
 - failover drill docs have been tested against a real backup provider
 - `docs/railway-live-drill.md` has a completed real Railway proof run, not only local harness output
 - README includes the required production wiring for migrations, worker heartbeats, monitor webhooks, and failback reconciliation
 - control-plane route security defaults have been reviewed for the release target
-
-Do not publish stable packages until:
-
-- at least one real adopter has run BatonKit with its own monitor and Postgres environment
-- operational runbooks cover failed migrations, stuck leases, degraded workers, and provider outages
 - package names and scope are confirmed
-- README has a copy-pasteable tutorial for a fresh Next.js + Postgres app
-- beta feedback has not found public API naming or data-model blockers
+- npm login and `@batonkit` scope permission are confirmed
+- publish dry-run passes for every public package
+- README or docs include a copy-pasteable tutorial for a fresh Next.js + Postgres app
+- operational runbooks cover failed migrations, stuck leases, degraded workers, provider outages, and failback reconciliation
 
-Plain language: beta can go to careful testers. Stable should wait until the package has been tried in a real small app and the rescue instructions are written down.
+Plain language: do not push the final npm button until the tests pass, the package names are confirmed, the npm account key works, and the rescue instructions are written down.

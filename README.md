@@ -170,16 +170,16 @@ The built-in `@batonkit/monitor-webhook` helper accepts generic payloads with ei
 
 If your monitoring tool sends a different shape, add a tiny adapter in your route handler before calling BatonKit's failover logic.
 
-## Known Beta Limitations
+## Stable 1.0 Boundaries
 
-- BatonKit is a public beta candidate, not a production-stable queue system.
+- BatonKit is a stable `1.0.0` package for small-team local-first background jobs with Postgres-backed queueing and optional Railway backup failover.
 - You must run the migration SQL yourself before enqueueing jobs.
 - You must wire the monitor webhook and call `applyFailoverEvent(...)` from your app.
 - You must run a periodic `reconcileFailback(...)` call if you use non-zero failback cooldowns.
 - The Next.js control route requires `Authorization: Bearer <secret>` for `GET` and `POST` unless you explicitly pass `publicRead: true`.
 - Workers only claim job names registered in their `jobs` list, so run one worker process per set of job handlers you want that process to own.
 
-Plain language: the package provides the queue, worker, baton state, and failover primitives. Your app still owns the wiring between monitor, route, worker processes, and deployment.
+Plain language: BatonKit provides the queue, worker, baton state, and failover primitives. Your app still owns the wiring between monitor, route, worker processes, and deployment.
 
 ## Database Tables
 
@@ -234,9 +234,9 @@ npm run drill:railway-live:remote
 
 ## Current Maturity
 
-BatonKit is ready for public beta review as `0.1.0-beta.0`. It is not production-stable yet, but it now has passing unit tests, real Postgres integration coverage, pack smoke tests, a simulated failover drill, a reusable Railway live drill harness, and completed Railway lab proof runs.
+BatonKit is being prepared as stable `1.0.0`. It has passing unit tests, real Postgres integration coverage, pack smoke tests, a simulated failover drill, a reusable Railway live drill harness, and completed Railway lab proof runs.
 
-Before production use, rerun the Railway-backed drill in your own environment, review the public API names against your app's needs, and confirm your monitor, migrations, worker process manager, and failback scheduler are wired.
+Before production use, rerun the Railway-backed drill in your own environment and confirm your monitor, migrations, worker process manager, and failback scheduler are wired.
 
 ## Example
 

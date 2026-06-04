@@ -50,22 +50,44 @@ npm audit --omit=dev
 
 ## Completion Notes
 
-- Pending.
+- Updated root, public package, example package, and lockfile versions to `1.0.0`.
+- Updated internal `@batonkit/*` dependency pins to `1.0.0`.
+- Updated README maturity language from beta candidate to stable `1.0.0` boundaries.
+- Updated CHANGELOG with a `1.0.0` stable entry and kept the npm auth/scope blocker explicit.
+- Updated `docs/release.md` to describe stable publish gates rather than beta-tagged publish gates.
+- Verification commands:
+
+```bash
+npm run build          # passed
+npm run typecheck      # passed
+npm run test           # passed
+npm run test:pack      # passed
+npm run lint           # passed
+npm audit --omit=dev   # passed: 0 vulnerabilities
+```
 
 ## Phase Review
 
-- Pending.
+- Status: complete. Stable version and release metadata now use `1.0.0`.
+- Regression risk: low. This phase changed package metadata and docs, not runtime behavior.
+- API clarity: improved. `@batonkit/worker` is part of the stable public package set, and docs no longer describe the release as beta.
+- Overengineering: avoided. No new automation or publish script was added before npm account permission is confirmed.
+- Test gaps: addressed for metadata changes through build, typecheck, unit tests, pack smoke, lint, and audit.
+- Docs gaps: partially addressed. Phase 03 still needs stable tutorial and operations runbooks before publish execution.
+- Performance/cost impact: none.
+- Security impact: neutral. The npm auth/scope blocker remains explicit.
+- Public-package ergonomics: improved because package metadata now matches the requested stable release target.
+- Later phase update: Phase 04 dry-runs must confirm all package tarballs report `1.0.0`.
 
 ## Completion Checklist
 
-- [ ] Package versions updated to `1.0.0`
-- [ ] Internal dependencies updated to `1.0.0`
-- [ ] Changelog updated
-- [ ] README maturity language updated
-- [ ] Release docs updated
-- [ ] Package smoke test passes
-- [ ] Phase review completed
-- [ ] Phase document updated
-- [ ] Later phase documents updated if needed
-- [ ] Phase committed
-
+- [x] Package versions updated to `1.0.0`
+- [x] Internal dependencies updated to `1.0.0`
+- [x] Changelog updated
+- [x] README maturity language updated
+- [x] Release docs updated
+- [x] Package smoke test passes
+- [x] Phase review completed
+- [x] Phase document updated
+- [x] Later phase documents updated if needed
+- [x] Phase committed

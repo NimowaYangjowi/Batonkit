@@ -1,6 +1,6 @@
 {
   "name": "@batonkit/core",
-  "version": "0.1.0-beta.0",
+  "version": "1.0.0",
   "description": "Core types and public primitives for BatonKit.",
   "type": "module",
   "license": "MIT",

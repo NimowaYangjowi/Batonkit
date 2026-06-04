@@ -1,6 +1,6 @@
 {
   "name": "batonkit-railway-live-drill-example",
-  "version": "0.1.0-beta.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,10 +11,10 @@
     "enqueue": "node dist/drill.js enqueue"
   },
   "dependencies": {
-    "@batonkit/core": "0.1.0-beta.0",
-    "@batonkit/postgres": "0.1.0-beta.0",
-    "@batonkit/provider-railway": "0.1.0-beta.0",
-    "@batonkit/worker": "0.1.0-beta.0",
+    "@batonkit/core": "1.0.0",
+    "@batonkit/postgres": "1.0.0",
+    "@batonkit/provider-railway": "1.0.0",
+    "@batonkit/worker": "1.0.0",
     "pg": "^8.21.0"
   },
   "devDependencies": {

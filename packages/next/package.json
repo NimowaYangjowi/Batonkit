@@ -1,6 +1,6 @@
 {
   "name": "@batonkit/next",
-  "version": "0.1.0-beta.0",
+  "version": "1.0.0",
   "description": "Next.js helpers for BatonKit.",
   "type": "module",
   "license": "MIT",
@@ -29,6 +29,6 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@batonkit/core": "0.1.0-beta.0"
+    "@batonkit/core": "1.0.0"
   }
 }
