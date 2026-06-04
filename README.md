@@ -260,4 +260,6 @@ npm run dev
 - `docs/failover.md`
 - `docs/api-reference.md`
 - `docs/failover-drill.md`
+- `docs/stable-next-postgres-tutorial.md`
+- `docs/operations-runbook.md`
 - `docs/release.md`

@@ -46,7 +46,7 @@ Publish stable packages with the default npm tag only after:
 - package names and scope are confirmed
 - npm login and `@batonkit` scope permission are confirmed
 - publish dry-run passes for every public package
-- README or docs include a copy-pasteable tutorial for a fresh Next.js + Postgres app
-- operational runbooks cover failed migrations, stuck leases, degraded workers, provider outages, and failback reconciliation
+- `docs/stable-next-postgres-tutorial.md` includes a copy-pasteable tutorial for a fresh Next.js + Postgres app
+- `docs/operations-runbook.md` covers failed migrations, stuck leases, degraded workers, provider outages, and failback reconciliation
 
 Plain language: do not push the final npm button until the tests pass, the package names are confirmed, the npm account key works, and the rescue instructions are written down.

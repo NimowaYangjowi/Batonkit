@@ -52,21 +52,41 @@ npm audit --omit=dev
 
 ## Completion Notes
 
-- Pending.
+- Added `docs/stable-next-postgres-tutorial.md` with install, env, migration, queue, Next.js control route, local worker, monitor, failback, and verification steps.
+- Added `docs/operations-runbook.md` with recovery guidance for failed migrations, stuck leases, degraded workers, provider outages, failback reconciliation, and secret/URL safety.
+- Linked both stable docs from README.
+- Updated `docs/release.md` to name the exact stable tutorial and operations runbook.
+- Verification commands:
+
+```bash
+npm run build          # passed
+npm run typecheck      # passed
+npm run test           # passed
+npm run lint           # passed
+npm audit --omit=dev   # passed: 0 vulnerabilities
+```
 
 ## Phase Review
 
-- Pending.
+- Status: complete. Stable setup and operations docs now exist and are linked.
+- Regression risk: low. This phase changed documentation only.
+- API clarity: improved. The tutorial explains the user-visible role of each package and route, not just code names.
+- Overengineering: avoided. The runbook stays operational and generic rather than adding new runtime abstractions.
+- Test gaps: not applicable to docs-only changes; baseline build, typecheck, tests, lint, and audit passed.
+- Docs gaps: addressed for stable publish readiness. Phase 04 still needs dry-run artifact inspection.
+- Performance/cost impact: none.
+- Security impact: positive. The runbook explicitly warns against committing control secrets and private database URLs.
+- Public-package ergonomics: improved because stable users now have both setup and rescue guidance.
+- Later phase update: Phase 04 can treat stable docs as complete and focus on release gates plus dry-run package contents.
 
 ## Completion Checklist
 
-- [ ] Copy-pasteable tutorial added or updated
-- [ ] Operations runbook added or updated
-- [ ] README linked to stable docs
-- [ ] Release docs linked to stable docs
-- [ ] Verification passes
-- [ ] Phase review completed
-- [ ] Phase document updated
-- [ ] Later phase documents updated if needed
-- [ ] Phase committed
-
+- [x] Copy-pasteable tutorial added or updated
+- [x] Operations runbook added or updated
+- [x] README linked to stable docs
+- [x] Release docs linked to stable docs
+- [x] Verification passes
+- [x] Phase review completed
+- [x] Phase document updated
+- [x] Later phase documents updated if needed
+- [x] Phase committed
