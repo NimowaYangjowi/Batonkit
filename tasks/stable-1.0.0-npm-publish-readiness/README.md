@@ -37,6 +37,7 @@ Plain language: the names look unused from public lookup, but the account key fo
 - Phase 01 complete: registry lookup and npm auth blocker recorded.
 - Phase 02 complete: package metadata and release docs moved to stable `1.0.0`.
 - Phase 03 complete: stable tutorial and operations runbook added.
+- Phase 04 complete: full release gate and npm publish dry-run passed for all public packages.
 
 ## Phase Index
 
