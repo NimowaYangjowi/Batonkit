@@ -59,20 +59,47 @@ npm view @batonkit/worker version
 
 ## Completion Notes
 
-- Pending.
+- `npm whoami` failed with `ENEEDAUTH`, so actual npm publish was not attempted.
+- `@batonkit/worker` remains confirmed as the public worker package name.
+- Rechecked public registry names; all returned `E404`:
+  - `@batonkit/core`
+  - `@batonkit/postgres`
+  - `@batonkit/worker`
+  - `@batonkit/next`
+  - `@batonkit/provider-railway`
+  - `@batonkit/monitor-webhook`
+- No partial publish occurred.
+- Actionable blocker: run `npm adduser` or otherwise authenticate npm on this machine, then confirm the logged-in account can publish under the `@batonkit` scope.
+- After auth is confirmed, publish in dependency order:
+  1. `@batonkit/core`
+  2. `@batonkit/postgres`
+  3. `@batonkit/worker`
+  4. `@batonkit/next`
+  5. `@batonkit/provider-railway`
+  6. `@batonkit/monitor-webhook`
+
+Plain language: nothing was uploaded yet. The next person only needs to unlock npm, then press the publish steps in order.
 
 ## Phase Review
 
-- Pending.
+- Status: blocked for actual npm registration, complete for publish preparation.
+- Regression risk: none. This phase changed documentation only and did not publish packages.
+- API clarity: unchanged. `@batonkit/worker` remains the confirmed worker package name.
+- Overengineering: avoided. The plan did not add publish automation while account permission is unknown.
+- Test gaps: no publish-preparation gap remains; Phase 04 passed full release gates and dry-runs.
+- Docs gaps: no blocking docs gap remains. The final blocker is account-level, not code or documentation.
+- Performance/cost impact: none.
+- Security impact: positive. The gate prevented unauthenticated or partial publish.
+- Public-package ergonomics: ready. Packages are `1.0.0`, dry-run clean, and documented.
+- Later phase update: none. The remaining action is outside repo code: npm authentication and scope permission.
 
 ## Completion Checklist
 
 - [ ] npm login confirmed
 - [ ] `@batonkit` scope permission confirmed
-- [ ] Package names rechecked
-- [ ] Stable publish completed or blocker recorded
+- [x] Package names rechecked
+- [x] Stable publish completed or blocker recorded
 - [ ] Registry result verified if published
-- [ ] Phase review completed
-- [ ] Phase document updated
-- [ ] Phase committed
-
+- [x] Phase review completed
+- [x] Phase document updated
+- [x] Phase committed

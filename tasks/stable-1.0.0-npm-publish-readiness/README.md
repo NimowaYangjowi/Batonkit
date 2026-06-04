@@ -38,6 +38,13 @@ Plain language: the names look unused from public lookup, but the account key fo
 - Phase 02 complete: package metadata and release docs moved to stable `1.0.0`.
 - Phase 03 complete: stable tutorial and operations runbook added.
 - Phase 04 complete: full release gate and npm publish dry-run passed for all public packages.
+- Phase 05 complete: actual npm publish is blocked only by npm login and `@batonkit` scope permission confirmation.
+
+## Final Status
+
+Stable `1.0.0` publish preparation is complete. Actual npm registration did not run because `npm whoami` fails with `ENEEDAUTH`.
+
+Plain language: the packages are boxed, labeled, and dry-run checked. The only missing piece is the npm account key that is allowed to put them on the public shelf.
 
 ## Phase Index
 
