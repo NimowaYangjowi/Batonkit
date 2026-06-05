@@ -16,13 +16,9 @@
 
 Refresh public docs and release notes so the hardened behavior is easy for third-party adopters to discover.
 
-Plain language: after fixing the machine, make sure the sticker on the box tells the truth.
-
 ## User-Facing Risk
 
 Even good fixes can be missed if the README, package docs, and release notes still describe the old behavior.
-
-Plain language: if the manual still says the old switch does one thing, users will keep using it the old way.
 
 ## Files
 

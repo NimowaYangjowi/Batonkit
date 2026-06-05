@@ -1,12 +1,16 @@
 # BatonKit Agent Guide
 
+## Communication Scope
+
+In assistant replies, use developer terminology by default and add concise, accessible explanations when they help the user. Do not add child-oriented labels, simplified side-note sections, or classroom-style analogies to repository artifacts unless the user explicitly requests that style for a specific document.
+
+Public artifacts such as README files, docs, examples, package READMEs, changelogs, release notes, and task plans should use polished developer-facing product copy. Keep explanations clear, but make them part of the normal document voice instead of separating them into simplified side-notes.
+
 ## Product Boundary
 
 BatonKit is a public npm package for small Next.js/Vercel + Postgres teams that want local-first background jobs with optional cloud backup failover.
 
 Do not add app-specific concepts to public APIs. Examples may use generic tasks such as `generate-preview`, but core packages must not depend on any single product's schema, UI, secrets, or deployment.
-
-Plain language: BatonKit is the reusable tool, not one customer's private workshop.
 
 ## First Files To Read
 

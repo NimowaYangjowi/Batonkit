@@ -9,8 +9,6 @@
 - Postgres public proxy: `zephyr.proxy.rlwy.net:58262`
 - Result: pass
 
-Plain language: the cloud backup worker really did take over the harmless middle job, and the local worker took control back afterward.
-
 ## Commands
 
 ```bash

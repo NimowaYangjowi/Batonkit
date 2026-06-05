@@ -14,8 +14,6 @@ Build a public npm package for small teams using Next.js/Vercel + Postgres that 
 - Next.js route-handler integration
 - provider adapters, starting with Railway
 
-Plain language: this package should let a small team use a local machine as the normal background worker, then wake a cloud worker only when the local machine is down.
-
 ## Target User
 
 Small teams and solo developers running:

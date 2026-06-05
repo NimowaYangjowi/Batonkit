@@ -15,8 +15,6 @@
 
 Run the actual live failover and failback drill against `batonkit-lab`.
 
-Plain language: prove that the backup worker on Railway can receive the baton and process real queued work.
-
 ## Files
 
 - Update: `docs/railway-live-drill.md`

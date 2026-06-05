@@ -16,13 +16,9 @@
 
 Reject malformed control-plane requests with clear `400` responses before they hit deeper runtime or store code.
 
-Plain language: the admin door should not just be locked; it should also tell you clearly when you are holding the wrong form.
-
 ## User-Facing Risk
 
 Today, the route authenticates callers but trusts the JSON body too much. Bad shapes can lead to confusing runtime failures instead of a clear client error.
-
-Plain language: the security guard checks your badge, but nobody checks whether your paper says "heartbeat" or random scribbles before handing it to the control room.
 
 ## Files
 

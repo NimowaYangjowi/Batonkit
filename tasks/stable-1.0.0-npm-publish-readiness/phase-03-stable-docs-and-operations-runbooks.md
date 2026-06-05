@@ -17,8 +17,6 @@
 
 Add the stable-release documentation that was previously listed as a blocker: copy-pasteable tutorial and operations runbooks for failed migrations, stuck leases, degraded workers, and provider outages.
 
-Plain language: stable users need instructions for both setup and rescue, not just the happy path.
-
 ## Tasks
 
 1. Add or update a copy-pasteable fresh Next.js + Postgres tutorial.

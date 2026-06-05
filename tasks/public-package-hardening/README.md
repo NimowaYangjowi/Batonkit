@@ -6,8 +6,6 @@
 
 Harden BatonKit from a developer-preview package skeleton into a more trustworthy public npm package.
 
-Plain language: BatonKit already has the basic machine. This plan tightens the parts a third-party user would rely on before trusting it with real background work.
-
 ## Review Inputs
 
 This plan is based on the project review findings from 2026-05-27:
@@ -27,8 +25,6 @@ Small teams and solo developers using:
 - Postgres as the shared queue and baton state
 - a local worker as the normal background worker
 - an optional cloud backup worker for outages
-
-Plain language: the target user is not a platform team. They need sharp defaults, clear failure modes, and examples that work when copied into a small real app.
 
 ## Phase Index
 
@@ -57,8 +53,6 @@ Add targeted checks when the phase touches those surfaces:
 - Failover behavior: `npm run drill:failover`
 - Railway live drill harness behavior: `npm run drill:railway-live`
 - Railway remote live drill behavior: `npm run drill:railway-live:remote`
-
-Plain language: the baseline checks make sure the package still builds, types still line up, tests still pass, style rules still pass, and production dependencies do not have known audit issues.
 
 ## Non-Goals
 

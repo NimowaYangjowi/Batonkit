@@ -6,8 +6,6 @@
 
 Move BatonKit from `0.1.0-beta.0` public beta candidate language to a stable `1.0.0` npm publish-ready release under the confirmed `@batonkit` scope, with `@batonkit/worker` as the confirmed worker package name.
 
-Plain language: this plan changes the box label from "test version" to "real first release", then checks that the box can actually be put on npm safely.
-
 ## Confirmed Direction
 
 - Stable version target: `1.0.0`
@@ -30,8 +28,6 @@ Plain language: this plan changes the box label from "test version" to "real fir
   - `@batonkit/provider-railway`
   - `@batonkit/monitor-webhook`
 - The `@batonkit` npm organization was created during Phase 05 because the scope did not exist before publish.
-
-Plain language: the names were empty before publish, then the public npm shelf for `@batonkit` was created and filled.
 
 ## Progress
 
@@ -64,8 +60,6 @@ npm view @batonkit/monitor-webhook version
 npm install @batonkit/core@1.0.0 @batonkit/postgres@1.0.0 @batonkit/worker@1.0.0 @batonkit/next@1.0.0 @batonkit/provider-railway@1.0.0 @batonkit/monitor-webhook@1.0.0 --dry-run
 ```
 
-Plain language: the packages are no longer just ready. They are live on npm, marked public, and a fresh install check can pick them up.
-
 ## Phase Index
 
 1. `phase-01-registry-and-scope-readiness.md`
@@ -94,8 +88,6 @@ Add targeted checks when the phase touches those surfaces:
 - Railway live drill harness behavior: `npm run drill:railway-live`
 - Railway remote live drill behavior: `npm run drill:railway-live:remote`
 - Publish artifacts: `npm publish --dry-run --access public` from each package directory
-
-Plain language: before calling this stable, prove the package builds, installs, runs the database path, hands work to the backup worker, and has no known production dependency vulnerabilities.
 
 ## Non-Goals
 

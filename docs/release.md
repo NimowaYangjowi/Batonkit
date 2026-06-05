@@ -2,8 +2,6 @@
 
 This project is being prepared for stable `1.0.0` publication.
 
-Plain language: BatonKit is moving from a test label to the first official npm release label. The code can be prepared now, but actual npm registration still needs a logged-in npm account with `@batonkit` scope permission.
-
 ## Versioning
 
 Use semantic versioning for public releases:
@@ -48,5 +46,3 @@ Publish stable packages with the default npm tag only after:
 - publish dry-run passes for every public package
 - `docs/stable-next-postgres-tutorial.md` includes a copy-pasteable tutorial for a fresh Next.js + Postgres app
 - `docs/operations-runbook.md` covers failed migrations, stuck leases, degraded workers, provider outages, and failback reconciliation
-
-Plain language: do not push the final npm button until the tests pass, the package names are confirmed, the npm account key works, and the rescue instructions are written down.

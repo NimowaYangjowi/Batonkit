@@ -6,8 +6,6 @@
 
 Move BatonKit from a developer-preview package toward a public beta release candidate, while preserving an honest decision boundary between "safe to preview" and "production-stable."
 
-Plain language: BatonKit already looks like a useful package. This plan checks the missing doors, fixes risky examples, proves the real database and backup worker path, then uses the ship workflow to create a reviewable release branch.
-
 ## Review Inputs
 
 This plan is based on the productization review from 2026-06-03:
@@ -30,8 +28,6 @@ Small Next.js/Vercel + Postgres teams that want:
 - security defaults that do not rely on hidden or guessed values
 - release notes that tell them what is preview-only and what is ready to trust
 
-Plain language: the user should be able to copy the setup, run the checks, and know exactly which parts are ready for real work.
-
 ## Phase Index
 
 1. `phase-01-branch-and-baseline-state.md` - complete
@@ -45,8 +41,6 @@ Plain language: the user should be able to copy the setup, run the checks, and k
 Decision on 2026-06-04: **public beta ready**, not production-stable.
 
 PR: https://github.com/NimowaYangjowi/Batonkit/pull/1
-
-Plain language: BatonKit is ready for careful beta testers to review and install, but it should not be described as fully production-stable yet. Stable release should wait for real adopter feedback and stronger operations runbooks.
 
 ## Cross-Phase Verification
 
@@ -68,8 +62,6 @@ Add targeted checks when the phase touches those surfaces:
 - Railway live drill harness behavior: `npm run drill:railway-live`
 - Railway remote live drill behavior: `npm run drill:railway-live:remote`
 
-Plain language: the baseline checks prove the package still builds, types still match, tests still pass, style stays clean, and installed dependencies do not have known production vulnerabilities.
-
 ## Ship Skill Rules For This Plan
 
 - Use the `/ship` skill only from a feature branch, not from `main`.
@@ -77,8 +69,6 @@ Plain language: the baseline checks prove the package still builds, types still 
 - Treat `/ship` as the final PR workflow after the implementation phases are committed.
 - Do not let `/ship` publish to npm. The PR should prepare a beta release candidate and final decision notes.
 - If `/ship` finds missing Eng Review, failing tests, merge conflicts, or ASK-level review findings, stop and resolve them before release.
-
-Plain language: `/ship` is the truck that carries the finished release candidate to review. Do not load the truck while standing in the main road.
 
 ## Non-Goals
 

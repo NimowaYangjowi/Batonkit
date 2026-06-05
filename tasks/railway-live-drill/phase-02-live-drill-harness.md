@@ -15,8 +15,6 @@
 
 Create a reusable live drill harness that can run a harmless BatonKit worker against a real Postgres URL.
 
-Plain language: make a small test app whose only job is to prove the baton can move safely.
-
 ## Files
 
 - Create: `examples/railway-live-drill/package.json`

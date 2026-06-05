@@ -17,13 +17,9 @@
 
 Update release metadata and public documentation so the package can be reviewed as a public beta candidate without pretending to be production-stable.
 
-Plain language: make the label match the box. If this is beta, the package, README, and release notes should all say beta-level things.
-
 ## User-Facing Risk
 
 Current package versions are `0.0.0`, and docs still say pre-release. That is honest, but it is not yet a clear beta candidate. A public beta needs versioning, changelog context, and a crisp "what is ready versus what still requires operator setup" statement.
-
-Plain language: customers should not have to guess whether they are looking at a rough draft or a release candidate.
 
 ## Files
 

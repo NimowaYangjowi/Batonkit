@@ -14,8 +14,6 @@
 
 Build the worker runtime that runs registered job handlers.
 
-Plain language: create the worker engine that takes work from the job line and actually does it.
-
 ## Scope
 
 - `defineJob`

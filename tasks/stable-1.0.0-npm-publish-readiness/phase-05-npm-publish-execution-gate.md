@@ -17,8 +17,6 @@
 
 Define the actual stable npm publish gate and record the stable release publication result.
 
-Plain language: this was the final stop sign. The npm key worked, so the packages were put on the public npm shelf and then checked from the outside.
-
 ## Tasks
 
 1. Confirm npm login:
@@ -89,8 +87,6 @@ npm install @batonkit/core@1.0.0 @batonkit/postgres@1.0.0 @batonkit/worker@1.0.0
 
 - The local npm auth token was removed from `~/.npmrc` after publish verification.
 - The generated web token remains revocable from the npm dashboard and expires on June 12, 2026.
-
-Plain language: all six boxes are now on npm, marked public, and a fresh outside install check can see them. The local key used to upload them was removed from this machine after the check.
 
 ## Phase Review
 

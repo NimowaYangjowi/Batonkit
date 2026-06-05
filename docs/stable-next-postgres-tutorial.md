@@ -2,8 +2,6 @@
 
 This tutorial shows the smallest stable `1.0.0` BatonKit shape for a Next.js app, a shared Postgres queue, one local worker, and one optional backup worker.
 
-Plain language: this is the copy-paste path for making one app write background work into Postgres while a local worker usually does the work.
-
 ## 1. Install Packages
 
 ```bash
@@ -23,8 +21,6 @@ export DATABASE_URL="postgres://user:password@localhost:5432/app"
 export BATONKIT_CONTROL_SECRET="$(openssl rand -hex 32)"
 ```
 
-Plain language: `DATABASE_URL` is the shared notebook where jobs and baton ownership are written. `BATONKIT_CONTROL_SECRET` is the key for the private control door.
-
 ## 3. Create The Tables
 
 Run the migration SQL once before enqueueing jobs:
@@ -38,8 +34,6 @@ import {
 await db.query(createQueueMigrationSql());
 await db.query(createControlPlaneMigrationSql());
 ```
-
-Plain language: this creates the job tickets table and the baton ownership table.
 
 ## 4. Create The Queue
 
@@ -73,8 +67,6 @@ await jobs.enqueue(
 );
 ```
 
-Plain language: if the app already named this job, BatonKit will not let another job quietly reuse the same name.
-
 ## 6. Add A Next.js Control Route
 
 ```ts
@@ -94,8 +86,6 @@ export const { GET, POST } = createControlPlaneHandlers({
 ```
 
 The route requires `Authorization: Bearer <secret>` for reads and writes by default.
-
-Plain language: the private control door is locked unless the request has the key.
 
 ## 7. Start A Local Worker
 
@@ -119,8 +109,6 @@ const worker = createWorker({
 await worker.start();
 ```
 
-Plain language: this worker only picks up job names it knows how to run.
-
 ## 8. Wire Monitor Events
 
 ```ts
@@ -138,8 +126,6 @@ await applyFailoverEvent({
 });
 ```
 
-Plain language: the monitor says "local is down" or "local is back", then BatonKit changes who is allowed to take jobs.
-
 ## 9. Run Failback Reconciliation
 
 Call this on a timer, such as a worker interval or scheduled job:
@@ -152,8 +138,6 @@ await reconcileFailback({
   provider,
 });
 ```
-
-Plain language: if there is a cooldown timer, this is the check that hands the baton home after the timer ends.
 
 ## 10. Verify Before Production
 

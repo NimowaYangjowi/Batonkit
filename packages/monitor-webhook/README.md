@@ -2,8 +2,6 @@
 
 Generic monitor webhook parsing helpers for BatonKit.
 
-Plain language: this is the package that translates a monitor's webhook payload into the two signals BatonKit cares about: "local is down" or "local is back." It is not tied to one monitoring company.
-
 ## Install
 
 ```bash

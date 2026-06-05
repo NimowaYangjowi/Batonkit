@@ -16,14 +16,10 @@
 
 Make public APIs behave consistently across stores and tighten control-plane state exposure.
 
-Plain language: the toy version and the real database version should not surprise users by behaving differently, and the status door should not show operational details to everyone by default.
-
 ## User-Facing Risks
 
 - Caller-provided job IDs work in the memory store but are ignored by the Postgres store.
 - `GET` control-plane state is public even though docs describe the route as a secure control door.
-
-Plain language: a user might test duplicate-safe job IDs locally and then lose that behavior in production. Separately, the status endpoint may reveal which worker owns the baton and which worker IDs are active.
 
 ## Files
 

@@ -16,13 +16,9 @@
 
 Prevent a worker from claiming and failing jobs that it is not registered to handle.
 
-Plain language: if one worker only knows how to make previews, it should not grab a billing report job and mark it failed just because it does not recognize it.
-
 ## User-Facing Risk
 
 Today, a worker first asks for jobs it knows by name. If none are available, it asks for any job and fails unknown work. That can poison a shared queue when different worker processes handle different task types.
-
-Plain language: this is like a cashier grabbing a kitchen order, saying "I do not cook this," and throwing the ticket away. The ticket should stay in the kitchen line instead.
 
 ## Files
 

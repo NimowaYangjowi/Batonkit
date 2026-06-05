@@ -17,13 +17,9 @@
 
 Remove unsafe secret fallback behavior from the user-visible Next.js example and document the expected development setup.
 
-Plain language: the example control door should not quietly use a weak default key. Users should set their own key before the door opens.
-
 ## User-Facing Risk
 
 `examples/next-postgres/app/api/control/route.ts` falls back to `dev-secret` when no environment secret is configured. A user may copy that route into a real app and accidentally expose control-plane reads and writes with a known secret.
-
-Plain language: a sample should not teach people to leave the front door key under the mat.
 
 ## Files
 

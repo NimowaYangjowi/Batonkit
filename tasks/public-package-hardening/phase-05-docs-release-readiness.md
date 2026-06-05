@@ -16,13 +16,9 @@
 
 Update public docs, examples, and release gates so a third-party evaluator can tell exactly what is production-ready and what remains preview-only.
 
-Plain language: after the code is stronger, the manual should stop sounding ahead of the machine and start telling users exactly what works.
-
 ## User-Facing Risk
 
 BatonKit has strong positioning, but public trust depends on accurate maturity signals. If docs promise behavior that still needs user wiring, users will lose confidence even when the underlying package is useful.
-
-Plain language: people forgive a preview package when it is honest. They get nervous when the brochure and the install experience disagree.
 
 ## Files
 

@@ -14,8 +14,6 @@
 
 Create the standalone repository foundation for the public npm package.
 
-Plain language: make the empty workshop ready before building the machine.
-
 ## Scope
 
 - Initialize package manager and TypeScript config.

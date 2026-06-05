@@ -2,8 +2,6 @@
 
 Local-first failover moves job ownership from local workers to backup workers when a monitor reports that local workers are down.
 
-Plain language: the local machine normally holds the baton. If it disappears, the backup cloud worker gets the baton.
-
 ## Flow
 
 1. Monitor reports local worker `down`.
@@ -15,8 +13,6 @@ Plain language: the local machine normally holds the baton. If it disappears, th
 7. A scheduled reconciliation call checks whether the cooldown has elapsed.
 8. After cooldown, ownership returns to `local` and the provider runs its `park()` step to put the backup side back into standby if that provider supports it.
 
-Plain language: the monitor only needs to say "local is back" once. After that, your app or worker should periodically call `reconcileFailback(...)`, like checking whether a kitchen timer has finished.
-
 ## Provider Interface
 
 Providers implement:
@@ -26,8 +22,6 @@ Providers implement:
 
 Railway is the first provider, but the interface is intentionally generic.
 
-Plain language: `park()` means "do the provider-specific standby step now." On some platforms that could eventually suspend or scale down the backup side. On Railway today, BatonKit does not turn the service off by itself. The Railway adapter only refreshes the backup worker's control-plane door so the standby side stays in sync.
-
 ## Monitor Webhooks
 
 `parseMonitorWebhookEvent()` accepts generic statuses:
@@ -36,8 +30,6 @@ Plain language: `park()` means "do the provider-specific standby step now." On s
 - up: `up`, `recovered`, `online`
 
 It will read those values from either `body.status` or `body.event`.
-
-Plain language: BatonKit is listening for the meaning of the alert, not for one specific monitoring company's brand name or exact JSON layout.
 
 ## External Monitor Dependency
 
@@ -54,13 +46,9 @@ For example, a small Next.js route can:
 2. map the vendor's payload into `down` or `up`
 3. call `applyFailoverEvent(...)`
 
-Plain language: think of BatonKit as expecting a simple traffic-light instruction. Your monitor can speak any language as long as your route translates it into red or green.
-
 ## Failback Reconciliation
 
 `applyFailoverEvent({ event: 'up', ... })` starts the failback cooldown when local is healthy again. `reconcileFailback(...)` should then run periodically from a cron, route, or worker-side loop. It restores local ownership only after `failbackNotBefore` has passed.
-
-Plain language: the `up` event starts the waiting period. The reconciliation call is the person who comes back after the wait and hands the baton home.
 
 ## What To Test
 
@@ -81,5 +69,3 @@ Recommended release check:
 
 - do not block every code change on a live test of every monitoring vendor
 - do run at least one end-to-end test with the actual monitoring tool you plan to use before trusting production failover
-
-Plain language: you do not need to rehearse every alarm company in the world. But before you trust one real alarm button in your house, you should press that exact button once.

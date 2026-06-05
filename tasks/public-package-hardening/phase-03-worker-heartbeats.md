@@ -16,13 +16,9 @@
 
 Add first-class heartbeat support to the worker runtime or correct the docs if the runtime should remain store-only.
 
-Plain language: if the docs say the worker reports "I am alive," the package should either do that for users or clearly show the small piece users must wire themselves.
-
 ## User-Facing Risk
 
 The worker README currently promises support for heartbeats, but `createWorker(...)` only accepts a job store, worker ID, job list, concurrency, leases, polling, and logger. A third-party user can reasonably expect status reporting to work out of the box and then discover the missing connection during deployment.
-
-Plain language: the manual says the machine has a dashboard light, but the installed machine has no wire to that light yet.
 
 ## Files
 

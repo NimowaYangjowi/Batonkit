@@ -17,13 +17,9 @@
 
 Run the `/ship` workflow from the productization feature branch, create the release-candidate PR, and record the final productization decision.
 
-Plain language: after the fixes and checks are done, use the shipping truck to create a reviewable PR, then write down whether BatonKit is ready for beta or still blocked.
-
 ## User-Facing Risk
 
 Running `/ship` too early could create a PR with stale tests, unreviewed release notes, or missing live verification. Running it from `main` would violate the ship workflow and make review harder.
-
-Plain language: do not send the package to reviewers until the box has the right label and every important lock has been checked.
 
 ## Files
 
@@ -126,8 +122,6 @@ npm audit --omit=dev             # passed: 0 vulnerabilities
 ```
 
 - Remote drill retry note: the first final `railway run --service backup-worker` attempt failed because it injected Railway's internal `postgres-jw1q.railway.internal` database URL while the command itself was running on the local Mac. The retry used the Railway public Postgres proxy URL for the local drill client while keeping the deployed `backup-worker` URL for the remote worker proof.
-
-Plain language: the first retry used an address that only works inside Railway. The passing retry used the address that a local computer can actually reach.
 
 ## Phase Review
 

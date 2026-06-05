@@ -2,8 +2,6 @@
 
 This example is a tiny BatonKit practice field for the Railway live drill.
 
-Plain language: it gives you a safe fake job called `generate-preview`, a local worker process, a backup worker service, and commands that let you watch the baton move between them.
-
 ## Environment Variables
 
 - `BATONKIT_DATABASE_URL`: Postgres URL for the shared queue and control-plane tables
@@ -60,8 +58,6 @@ curl "$BATONKIT_READY_URL"
 
 This returns only `{ "ok": true }`. Add `Authorization: Bearer $BATONKIT_CONTROL_SECRET` when you need the detailed ownership snapshot.
 
-Plain language: the public web door only says whether the backup worker is awake. The secret request shows the private control-room details.
-
 Enqueue one harmless test job:
 
 ```bash
@@ -74,7 +70,5 @@ Trigger failover or failback using the shared control store and optional Railway
 node examples/railway-live-drill/dist/drill.js failover down
 node examples/railway-live-drill/dist/drill.js failover up
 ```
-
-Plain language: the harness now has automated tests for both the backup worker web door and the baton handoff rehearsal, so those steps no longer rely only on manual watching.
 
 Provider note: in this Railway drill harness, `park()` does not turn the backup service off. It only refreshes the standby worker's control-plane door so the baton state stays accurate.

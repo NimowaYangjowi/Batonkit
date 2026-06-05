@@ -2,8 +2,6 @@
 
 Use this runbook to prove that BatonKit can hand background work from a local worker to a Railway backup worker and then hand it back again.
 
-Plain language: this is the checklist for making sure the cloud backup worker can safely take over when the local machine goes down.
-
 ## Current Status
 
 - Local harness proof: complete
@@ -125,8 +123,6 @@ Use the bearer secret only when you need the detailed ownership snapshot:
 curl -H "Authorization: Bearer $BATONKIT_CONTROL_SECRET" https://backup-worker-production-f754.up.railway.app/ready
 ```
 
-Plain language: the public door only shows a green light. The private door shows the dashboard with worker name and baton owner.
-
 ## Observed Execution
 
 Observed on 2026-05-26:
@@ -140,8 +136,6 @@ Observed on 2026-05-26:
 - `curl https://backup-worker-production-f754.up.railway.app/ready` returned HTTP 200
 - `npm run drill:railway-live:remote` completed successfully
 
-Plain language: the real Railway backup worker has now been proven. It took the baton for the middle drill job and then gave it back to the local worker.
-
 Observed on 2026-06-04:
 
 - Existing Railway CLI access could update variables and deploy `backup-worker`, but could not provision a replacement Postgres service.
@@ -151,8 +145,6 @@ Observed on 2026-06-04:
 - `backup-worker` was redeployed with `BATONKIT_DATABASE_URL=${{Postgres-jw1q.DATABASE_URL}}` and reached `SUCCESS`.
 - `curl https://backup-worker-production-f754.up.railway.app/ready` returned `{ "ok": true }`.
 - `npm run drill:railway-live:remote` completed successfully with ownership moving `local -> backup -> local`.
-
-Plain language: when the old lab database door was broken, a new lab database was created and the full baton handoff was proven again.
 
 ## Automated Coverage
 
@@ -167,8 +159,6 @@ The repository now automatically checks:
 - both drill server doors return readable `500` JSON when the control-plane state cannot be read or refreshed
 - the local practice drill hands the middle job from the local worker to the backup worker and back
 - the remote drill waits for the backup worker to finish the middle job before returning ownership
-
-Plain language: BatonKit now tests the important doors and baton handoff steps automatically, not just by manual rehearsal.
 
 Provider note: in the Railway adapter, `park()` means "refresh the standby control-plane door again." It does not shut the Railway service down by itself.
 

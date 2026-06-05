@@ -14,8 +14,6 @@
 
 Prepare the project for public npm release and external adoption.
 
-Plain language: make the tool understandable and installable by someone who has never seen Redprint.
-
 ## Scope
 
 - Public README

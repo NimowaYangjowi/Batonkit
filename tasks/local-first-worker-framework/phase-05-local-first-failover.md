@@ -14,8 +14,6 @@
 
 Add automatic failover and failback behavior with provider adapters.
 
-Plain language: if the local worker stops answering, let the cloud backup worker take the baton; when local is stable again, hand the baton back.
-
 ## Scope
 
 - Monitor webhook parser

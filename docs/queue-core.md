@@ -2,8 +2,6 @@
 
 BatonKit v1 uses Postgres as the durable job queue and control store.
 
-Plain language: the database is the shared notebook where the app writes work, workers reserve work, and completed or failed work is recorded.
-
 ## Job Lifecycle
 
 - `pending`: waiting to be claimed
@@ -40,10 +38,6 @@ await jobs.enqueue(
 Both the memory store and the Postgres store preserve caller-provided job ids.
 
 If you reuse the same caller-provided job id, BatonKit rejects the duplicate enqueue instead of silently replacing the earlier job.
-
-Plain language: if your app already has a stable name for a piece of background work, BatonKit can use that same name instead of inventing a new one.
-
-Plain language: if you already stuck the name tag `job_file_123_preview` onto one ticket, BatonKit will not quietly rip it off and stick it onto a different ticket later.
 
 ## Migration
 

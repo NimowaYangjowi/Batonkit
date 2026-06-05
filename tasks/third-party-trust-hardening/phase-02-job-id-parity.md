@@ -16,13 +16,9 @@
 
 Make caller-provided job IDs behave consistently between the in-memory queue and the Postgres queue.
 
-Plain language: the practice version and the real version should react the same way when a user tries to reuse the same job ticket number.
-
 ## User-Facing Risk
 
 Today, the in-memory queue silently replaces an existing job when the same ID is reused, while the Postgres queue rejects that duplicate key. This makes local tests less trustworthy.
-
-Plain language: in the toy box version, writing the same name tag twice secretly swaps the old toy. In the real warehouse, the clerk stops you and says that tag is already taken.
 
 ## Files
 

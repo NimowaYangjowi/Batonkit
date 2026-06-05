@@ -15,8 +15,6 @@
 
 Create an isolated Railway project named `batonkit-lab` and deploy the live drill harness.
 
-Plain language: set up a safe cloud practice field for BatonKit.
-
 ## Files
 
 - Create: `docs/railway-live-drill.md`

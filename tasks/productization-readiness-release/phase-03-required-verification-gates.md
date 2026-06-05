@@ -17,13 +17,9 @@
 
 Run and record every release gate that blocked the productization decision: real Postgres integration, package installability, simulated failover, local Railway drill, and remote Railway-backed drill.
 
-Plain language: this phase proves the queue works with a real database and proves the backup-worker handoff works outside a toy unit test.
-
 ## User-Facing Risk
 
 Without these checks, BatonKit can only be called a developer preview. A real adopter needs proof that the shared Postgres tables, worker ownership, and Railway provider path work together.
-
-Plain language: the small test car worked on the desk. This phase drives the real car around the block.
 
 ## Files
 

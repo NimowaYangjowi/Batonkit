@@ -4,8 +4,6 @@
 
 Postgres-first background jobs for small Next.js/Vercel teams that want to run work on local hardware first and wake a cloud backup worker only when needed.
 
-Plain language: your local machine normally does the slow background work. If it goes down, a cloud worker can take the baton.
-
 ## What Problem Does This Solve?
 
 Many small products have useful background work that does not need to finish instantly:
@@ -50,8 +48,6 @@ npm install @batonkit/core @batonkit/postgres @batonkit/worker @batonkit/next
 
 Create a shared Postgres-backed queue and control plane:
 
-Plain language: in the snippets below, `db` means your app's Postgres query client. It is the database connection object that BatonKit uses to read and write the shared work queue and the shared baton state.
-
 ```ts
 import { createGatedStore, createJobs } from '@batonkit/core';
 import {
@@ -69,8 +65,6 @@ const backupStore = createGatedStore(baseStore, control, 'backup');
 const jobs = createJobs({ store: localStore });
 ```
 
-Plain language: `baseStore` is the shared Postgres work queue, `control` is the shared baton traffic light, `localStore` is the local worker's view of the queue, and `backupStore` is the cloud backup worker's view.
-
 Create the database tables:
 
 ```ts
@@ -86,8 +80,6 @@ await jobs.enqueue('generate-preview', { fileId: 'file_123' });
 
 If you provide your own job ID for idempotency or tracing, BatonKit preserves that ID and rejects later duplicate enqueues that reuse it.
 
-Plain language: if your app already named one background ticket `job_file_123_preview`, BatonKit will not quietly let a second different ticket steal that same name.
-
 Add a Next.js control route:
 
 ```ts
@@ -100,8 +92,6 @@ export const { GET, POST } = createControlPlaneHandlers({
   secret: process.env.BATONKIT_CONTROL_SECRET!,
 });
 ```
-
-Plain language: this route is the secure door that lets your monitor or your backup worker report "local is down" or "local is healthy again" into the shared baton state.
 
 Run a local worker on your own machine:
 
@@ -152,15 +142,11 @@ The backup worker will stay passive while local ownership is active because `bac
 7. When local is healthy again, failback waits for a cooldown.
 8. A scheduled call to `reconcileFailback(...)` returns ownership to `local` after the cooldown.
 
-Plain language: the monitor only needs to report "local is back" once. After that, run a small periodic check so BatonKit can hand the baton home when the wait is over.
-
 Provider note: BatonKit always calls the provider's `park()` hook when ownership returns to `local`, but what that means depends on the platform adapter. For example, the Railway adapter currently refreshes the backup worker control door and leaves service suspension or scale-down to Railway-side configuration.
 
 ## Monitoring Dependency
 
 BatonKit is not tied to HetrixTools, UptimeRobot, or any single monitoring dashboard.
-
-Plain language: the package only needs a simple "local machine is down" or "local machine is back" signal. The monitor can be any tool that can send a webhook your app can translate into those two meanings.
 
 The built-in `@batonkit/monitor-webhook` helper accepts generic payloads with either:
 
@@ -178,8 +164,6 @@ If your monitoring tool sends a different shape, add a tiny adapter in your rout
 - You must run a periodic `reconcileFailback(...)` call if you use non-zero failback cooldowns.
 - The Next.js control route requires `Authorization: Bearer <secret>` for `GET` and `POST` unless you explicitly pass `publicRead: true`.
 - Workers only claim job names registered in their `jobs` list, so run one worker process per set of job handlers you want that process to own.
-
-Plain language: BatonKit provides the queue, worker, baton state, and failover primitives. Your app still owns the wiring between monitor, route, worker processes, and deployment.
 
 ## Database Tables
 

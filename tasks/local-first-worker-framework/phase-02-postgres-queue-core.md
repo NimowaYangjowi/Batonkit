@@ -14,8 +14,6 @@
 
 Build the Postgres-backed job queue primitives.
 
-Plain language: create the shared job line where apps can put work and workers can safely pick up one item at a time.
-
 ## Scope
 
 - Job definition API

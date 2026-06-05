@@ -15,8 +15,6 @@
 
 Implement a real Postgres-backed `ControlStore` so ownership and heartbeat state are durable.
 
-Plain language: the baton holder must be written in the shared database, not just memory, so local and Railway workers agree on who may work.
-
 ## Files
 
 - Modify: `packages/postgres/src/index.ts`

@@ -16,13 +16,9 @@
 
 Prevent a worker from looking healthy while its main polling loop has already stopped making progress.
 
-Plain language: the background helper should not show a green status light if its motor already stalled.
-
 ## User-Facing Risk
 
 Today, a storage error or unexpected runtime error can bubble out of the worker loop and end the processing promise. Heartbeats can still keep reporting `ok`, which creates a false sense of safety during an outage.
-
-Plain language: this is like a delivery truck that keeps sending "I am here" pings from the parking lot even though the engine died and packages are no longer moving.
 
 ## Files
 

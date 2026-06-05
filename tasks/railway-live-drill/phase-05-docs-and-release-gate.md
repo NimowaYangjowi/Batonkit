@@ -15,8 +15,6 @@
 
 Update public docs and release gates based on the real Railway drill.
 
-Plain language: turn the practice run into trustworthy instructions for future users.
-
 ## Files
 
 - Update: `README.md`

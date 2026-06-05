@@ -17,8 +17,6 @@
 
 Change package metadata from `0.1.0-beta.0` to stable `1.0.0`, and update release docs so users see a stable first release rather than a beta candidate.
 
-Plain language: this phase changes the version sticker from "test release" to "first official release".
-
 ## Tasks
 
 1. Update root, package, example, and lockfile versions from `0.1.0-beta.0` to `1.0.0`.

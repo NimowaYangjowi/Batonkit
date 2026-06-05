@@ -17,13 +17,9 @@
 
 Create a clean release-candidate working branch and record the exact starting state before productization changes begin.
 
-Plain language: before fixing the package, make sure we are working on the right branch and know what changed locally versus what changed on GitHub.
-
 ## User-Facing Risk
 
 The current repository is on `main`, ahead of `origin/main` by local commits and behind by one remote commit. Shipping from this state could miss the remote README hero image commit or mix unrelated local work into the release.
-
-Plain language: if two people wrote on the same checklist, first combine the pages before sending the checklist to customers.
 
 ## Files
 

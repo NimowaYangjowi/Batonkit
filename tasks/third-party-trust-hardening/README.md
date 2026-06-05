@@ -6,8 +6,6 @@
 
 Harden BatonKit in the places where a third-party adopter is most likely to lose trust: worker liveness, queue behavior consistency, and control-plane input safety.
 
-Plain language: this plan focuses on the scary moments for an outside team. If the background worker quietly stops, if the same job key behaves differently in test and production, or if the admin control door accepts bad input, people stop trusting the package.
-
 ## Review Inputs
 
 This plan is based on the 2026-05-27 project review findings:
@@ -24,8 +22,6 @@ Small teams and solo developers using:
 - Postgres as the shared queue and baton state
 - one local worker as the normal background worker
 - an optional cloud backup worker for outages
-
-Plain language: the target user is a small product team, not a big platform team with a dedicated operations staff. They need sharp failure behavior and clear docs.
 
 ## Phase Index
 
@@ -54,8 +50,6 @@ Add targeted checks when the phase touches those surfaces:
 - Railway live drill harness behavior: `npm run drill:railway-live`
 - Railway remote live drill behavior: `npm run drill:railway-live:remote`
 
-Plain language: the baseline checks make sure the package still builds, types still match, tests still pass, lint stays clean, and production dependencies do not have known audit issues.
-
 ## Delivery Rules
 
 - Keep each phase independently shippable.
@@ -63,8 +57,6 @@ Plain language: the baseline checks make sure the package still builds, types st
 - At the end of each phase, run a review focused on regression risk, API clarity, overengineering, test gaps, docs gaps, performance/cost impact, security impact, and public-package ergonomics.
 - Update the completed phase document before moving to the next phase.
 - If implementation changes the design, update later phase documents before starting them.
-
-Plain language: do one small safe improvement at a time, write down what changed, then use that new reality to keep the rest of the plan honest.
 
 ## Non-Goals
 

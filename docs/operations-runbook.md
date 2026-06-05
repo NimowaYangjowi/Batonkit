@@ -2,8 +2,6 @@
 
 Use this runbook when BatonKit is installed in a real app and the queue, worker, database, or backup provider needs attention.
 
-Plain language: this is the rescue checklist for the shared job notebook and the workers reading it.
-
 ## Failed Migrations
 
 Symptoms:
@@ -59,8 +57,6 @@ Recovery:
 3. If the worker is gone and the lease has expired, start a worker that has the matching job name in its `jobs` list.
 4. If a job is repeatedly failing, inspect `lfw_job_events` before retrying.
 
-Plain language: do not steal a ticket from a worker that may still be writing. First check whether its time to hold the ticket has expired.
-
 ## Degraded Workers
 
 Symptoms:
@@ -84,8 +80,6 @@ Recovery:
 3. Restart the worker.
 4. Confirm the heartbeat returns to `ok`.
 
-Plain language: a degraded heartbeat means the worker is telling you "I am sick." Fix the illness instead of hiding the message.
-
 ## Provider Outages
 
 Symptoms:
@@ -108,8 +102,6 @@ Recovery:
 3. Confirm the backup worker can reach the same Postgres database as the local worker.
 4. Retry the failover event after the provider is reachable.
 
-Plain language: the backup worker needs both a green public door and the same private key before it can safely help.
-
 ## Failback Reconciliation
 
 Symptoms:
@@ -131,8 +123,6 @@ Recovery:
 2. Confirm your app or worker is calling `reconcileFailback(...)` on a timer.
 3. Confirm the provider `park()` step succeeds.
 4. After reconciliation, confirm `active_owner` is `local`.
-
-Plain language: the monitor says "local is back" once, but the timer check is what actually hands the baton home after cooldown.
 
 ## Secret And URL Safety
 

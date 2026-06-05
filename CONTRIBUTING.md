@@ -21,8 +21,6 @@ Add the checks below when your change touches these areas:
 - Failover logic or failback timing: `npm run drill:failover`
 - Railway live drill harness or runbook: `npm run drill:railway-live`
 
-Plain language: if you changed the shared database-backed baton logic, run the real database test. If you changed how the package is packed for npm, run the fake consumer install test. If you changed the emergency handoff behavior, run the handoff drill too.
-
 ## Pull Request Notes
 
 Please mention:
@@ -30,8 +28,6 @@ Please mention:
 - what user-facing behavior changed
 - which verification commands you ran
 - whether docs or examples were updated
-
-Plain language: think of this as the note you would leave for the next teammate so they can tell what changed, how you tested it, and where to look first.
 
 ## Product Boundary
 

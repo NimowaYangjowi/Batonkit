@@ -17,8 +17,6 @@
 
 Run every stable release gate and inspect npm publish dry-run artifacts before actual npm publish.
 
-Plain language: this phase opens each box, checks the label, checks the contents, and makes sure npm would accept the package shape.
-
 ## Tasks
 
 1. Run the full stable gate:

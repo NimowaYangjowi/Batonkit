@@ -14,8 +14,6 @@
 
 Add Next.js/Vercel-friendly control-plane helpers.
 
-Plain language: give the web app a small control desk where workers can report health and external monitors can report outages.
-
 ## Scope
 
 - Worker heartbeat table

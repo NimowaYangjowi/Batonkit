@@ -2,8 +2,6 @@
 
 The worker runtime executes registered job handlers against a `JobStore`.
 
-Plain language: this is the background engine that picks up work from the queue and runs the matching function.
-
 ## Minimal Usage
 
 ```ts
@@ -32,8 +30,6 @@ await worker.start();
 - Failed handlers mark jobs as `failed` or `dead_letter`, depending on retry state.
 - `stop()` prevents new claims.
 
-Plain language: if one worker is built to generate previews and another worker is built to send reports, the preview worker will leave report jobs alone instead of failing them.
-
 ## Heartbeats
 
 Workers can report their health to a control store when you pass both `control` and `platform`:
@@ -51,8 +47,4 @@ const worker = createWorker({
 
 Heartbeat setup is optional. When enabled, the worker records an `ok` heartbeat on `start()`, keeps refreshing it on the configured interval, and records `stopping` when `stop()` completes.
 
-Plain language: this is the status light for the worker. The control plane can show whether the local or backup worker has checked in recently.
-
 If the main polling loop hits an unhandled store or runtime error, the worker logs the failure and starts reporting `degraded` heartbeats until you stop or replace that worker process.
-
-Plain language: if the engine stalls, the status light should turn into a warning light instead of pretending everything is normal.

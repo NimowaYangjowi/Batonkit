@@ -17,8 +17,6 @@
 
 Confirm the package scope, package names, npm login status, and registry availability before changing stable release metadata.
 
-Plain language: before printing the final label, make sure the label name is available and the person holding the npm key can use it.
-
 ## Tasks
 
 1. Confirm current branch and PR state.
@@ -66,8 +64,6 @@ npm view @batonkit/monitor-webhook name version --json
   - `@batonkit/provider-railway`
   - `@batonkit/monitor-webhook`
 - Publish execution blocker: npm login and `@batonkit` scope permission still need to be confirmed before actual publish.
-
-Plain language: the package names look open, but the npm account key is not present yet.
 
 ## Phase Review
 

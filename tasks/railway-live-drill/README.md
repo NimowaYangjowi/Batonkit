@@ -6,8 +6,6 @@
 
 Validate BatonKit against a real Railway project, not only local simulations.
 
-Plain language: prove that a real Railway backup worker can wake up, receive the baton, claim work from Postgres, process a harmless job, and hand ownership back to local.
-
 ## Why This Exists
 
 BatonKit already has:

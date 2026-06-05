@@ -16,13 +16,9 @@
 
 Make failback behavior match the public promise: after local recovery and cooldown, ownership returns to local without requiring an accidental second monitor event.
 
-Plain language: when the local worker comes back, BatonKit should know how to hand the baton home after the waiting period. Users should not need to press the same "local is back" button twice.
-
 ## User-Facing Risk
 
 Current behavior starts a cooldown on an `up` event, but restoration only happens if another `up` event arrives after the cooldown. Many monitoring tools send one recovery webhook. In that case, backup ownership may stay active longer than intended.
-
-Plain language: the alarm says the local machine is healthy again, BatonKit starts a timer, but nobody comes back to turn the timer into action.
 
 ## Files
 
