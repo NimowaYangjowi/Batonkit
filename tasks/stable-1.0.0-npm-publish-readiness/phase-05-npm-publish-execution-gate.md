@@ -15,9 +15,9 @@
 
 ## Goal
 
-Define the actual stable npm publish gate and record whether the release can be published now or remains blocked by account permission.
+Define the actual stable npm publish gate and record the stable release publication result.
 
-Plain language: this is the final stop sign. If the npm key works and every check passed, publish can happen. If the key is missing, stop cleanly.
+Plain language: this was the final stop sign. The npm key worked, so the packages were put on the public npm shelf and then checked from the outside.
 
 ## Tasks
 
@@ -52,54 +52,66 @@ npm view @batonkit/worker version
 
 ## Acceptance Criteria
 
-- The release is either published as stable `1.0.0` or explicitly blocked by npm auth/scope permission.
-- If published, every package is registered under `@batonkit` with version `1.0.0`.
-- If blocked, the blocker is actionable and no partial publish occurred.
+- The release is published as stable `1.0.0`.
+- Every package is registered under `@batonkit` with version `1.0.0`.
+- Public registry lookup and public install dry-run checks pass without an npm auth token.
 - The final decision is documented and committed.
 
 ## Completion Notes
 
-- `npm whoami` failed with `ENEEDAUTH`, so actual npm publish was not attempted.
+- `npm whoami` succeeded as `yubufox` after npm authentication was provided.
+- A temporary granular npm access token with 2FA bypass was generated in the logged-in Chrome session for the publish operation.
+- The `@batonkit` npm organization was created because the scope did not exist before the first publish attempt.
 - `@batonkit/worker` remains confirmed as the public worker package name.
-- Rechecked public registry names; all returned `E404`:
+- Rechecked public registry names before publish; all returned `E404`:
   - `@batonkit/core`
   - `@batonkit/postgres`
   - `@batonkit/worker`
   - `@batonkit/next`
   - `@batonkit/provider-railway`
   - `@batonkit/monitor-webhook`
-- No partial publish occurred.
-- Actionable blocker: run `npm adduser` or otherwise authenticate npm on this machine, then confirm the logged-in account can publish under the `@batonkit` scope.
-- After auth is confirmed, publish in dependency order:
+- Published stable `1.0.0` packages in dependency order:
   1. `@batonkit/core`
   2. `@batonkit/postgres`
   3. `@batonkit/worker`
   4. `@batonkit/next`
   5. `@batonkit/provider-railway`
   6. `@batonkit/monitor-webhook`
+- `npm access get status` reported `public` for all six packages.
+- npm web verified the organization package list, package version `1.0.0`, package access `Public`, and package access status `public`.
+- Public registry propagation completed after a short delay.
+- Public `npm view` checks without an auth token returned `1.0.0` for all six packages.
+- Public install dry-run without an auth token passed for all six packages:
 
-Plain language: nothing was uploaded yet. The next person only needs to unlock npm, then press the publish steps in order.
+```bash
+npm install @batonkit/core@1.0.0 @batonkit/postgres@1.0.0 @batonkit/worker@1.0.0 @batonkit/next@1.0.0 @batonkit/provider-railway@1.0.0 @batonkit/monitor-webhook@1.0.0 --dry-run
+```
+
+- The local npm auth token was removed from `~/.npmrc` after publish verification.
+- The generated web token remains revocable from the npm dashboard and expires on June 12, 2026.
+
+Plain language: all six boxes are now on npm, marked public, and a fresh outside install check can see them. The local key used to upload them was removed from this machine after the check.
 
 ## Phase Review
 
-- Status: blocked for actual npm registration, complete for publish preparation.
-- Regression risk: none. This phase changed documentation only and did not publish packages.
+- Status: complete. Stable `1.0.0` npm publish succeeded.
+- Regression risk: low. Runtime code did not change in this phase; the external behavior changed because public packages now exist on npm.
 - API clarity: unchanged. `@batonkit/worker` remains the confirmed worker package name.
-- Overengineering: avoided. The plan did not add publish automation while account permission is unknown.
-- Test gaps: no publish-preparation gap remains; Phase 04 passed full release gates and dry-runs.
-- Docs gaps: no blocking docs gap remains. The final blocker is account-level, not code or documentation.
+- Overengineering: avoided. The release used explicit npm checks and direct publish commands instead of adding repo automation for a one-time account operation.
+- Test gaps: no blocking publish gap remains; Phase 04 passed full release gates and dry-runs, and this phase passed public registry lookup plus public install dry-run.
+- Docs gaps: no blocking docs gap remains. The stable publish result is recorded here.
 - Performance/cost impact: none.
-- Security impact: positive. The gate prevented unauthenticated or partial publish.
-- Public-package ergonomics: ready. Packages are `1.0.0`, dry-run clean, and documented.
-- Later phase update: none. The remaining action is outside repo code: npm authentication and scope permission.
+- Security impact: positive. A temporary granular publish token was used, local npm auth was removed after verification, and the npm dashboard token should be revoked once the user confirms it is no longer needed.
+- Public-package ergonomics: published. Packages are `1.0.0`, public, dry-run installable, and documented.
+- Later phase update: none. This is the final phase.
 
 ## Completion Checklist
 
-- [ ] npm login confirmed
-- [ ] `@batonkit` scope permission confirmed
+- [x] npm login confirmed
+- [x] `@batonkit` scope permission confirmed
 - [x] Package names rechecked
 - [x] Stable publish completed or blocker recorded
-- [ ] Registry result verified if published
+- [x] Registry result verified if published
 - [x] Phase review completed
 - [x] Phase document updated
 - [x] Phase committed

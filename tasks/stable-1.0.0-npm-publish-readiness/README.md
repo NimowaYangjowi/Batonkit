@@ -14,23 +14,24 @@ Plain language: this plan changes the box label from "test version" to "real fir
 - Confirmed worker package name: `@batonkit/worker`
 - Publish scope: `@batonkit`
 - Publish mode: stable npm publish, not beta-tagged prerelease
-- No npm publish should happen until npm login and scope ownership are confirmed.
+- npm publish happened only after npm login and scope ownership were confirmed.
 
 ## Initial Known State
 
 - Branch: `codex/productization-readiness`
 - Existing PR: https://github.com/NimowaYangjowi/Batonkit/pull/1
 - Initial package version before Phase 02: `0.1.0-beta.0`
-- `npm whoami` currently fails with `ENEEDAUTH`, so this machine is not logged in to npm.
-- Registry lookup returned `E404` for the public package names checked:
+- `npm whoami` initially failed with `ENEEDAUTH`; npm authentication was later provided through the logged-in browser session.
+- Registry lookup returned `E404` for the public package names checked before publish:
   - `@batonkit/core`
   - `@batonkit/postgres`
   - `@batonkit/worker`
   - `@batonkit/next`
   - `@batonkit/provider-railway`
   - `@batonkit/monitor-webhook`
+- The `@batonkit` npm organization was created during Phase 05 because the scope did not exist before publish.
 
-Plain language: the names look unused from public lookup, but the account key for publishing is not installed on this machine yet.
+Plain language: the names were empty before publish, then the public npm shelf for `@batonkit` was created and filled.
 
 ## Progress
 
@@ -38,13 +39,32 @@ Plain language: the names look unused from public lookup, but the account key fo
 - Phase 02 complete: package metadata and release docs moved to stable `1.0.0`.
 - Phase 03 complete: stable tutorial and operations runbook added.
 - Phase 04 complete: full release gate and npm publish dry-run passed for all public packages.
-- Phase 05 complete: actual npm publish is blocked only by npm login and `@batonkit` scope permission confirmation.
+- Phase 05 complete: stable `1.0.0` packages were published to npm and public install dry-run verification passed.
 
 ## Final Status
 
-Stable `1.0.0` publish preparation is complete. Actual npm registration did not run because `npm whoami` fails with `ENEEDAUTH`.
+Stable `1.0.0` publication is complete. The following public npm packages are registered and installable:
 
-Plain language: the packages are boxed, labeled, and dry-run checked. The only missing piece is the npm account key that is allowed to put them on the public shelf.
+- `@batonkit/core@1.0.0`
+- `@batonkit/postgres@1.0.0`
+- `@batonkit/worker@1.0.0`
+- `@batonkit/next@1.0.0`
+- `@batonkit/provider-railway@1.0.0`
+- `@batonkit/monitor-webhook@1.0.0`
+
+Public verification passed without a local npm auth token:
+
+```bash
+npm view @batonkit/core version
+npm view @batonkit/postgres version
+npm view @batonkit/worker version
+npm view @batonkit/next version
+npm view @batonkit/provider-railway version
+npm view @batonkit/monitor-webhook version
+npm install @batonkit/core@1.0.0 @batonkit/postgres@1.0.0 @batonkit/worker@1.0.0 @batonkit/next@1.0.0 @batonkit/provider-railway@1.0.0 @batonkit/monitor-webhook@1.0.0 --dry-run
+```
+
+Plain language: the packages are no longer just ready. They are live on npm, marked public, and a fresh install check can pick them up.
 
 ## Phase Index
 
@@ -79,8 +99,9 @@ Plain language: before calling this stable, prove the package builds, installs, 
 
 ## Non-Goals
 
-- Do not publish to npm while `npm whoami` fails.
-- Do not publish unless the npm account has permission for the `@batonkit` scope.
+- Do not republish the same version; npm versions are immutable after publication.
+- Do not publish future versions while `npm whoami` fails.
+- Do not publish future packages unless the npm account has permission for the `@batonkit` scope.
 - Do not use beta prerelease tags for the stable `1.0.0` release.
 - Do not change public package names away from `@batonkit/*` in this plan.
 - Do not add app-specific job names, table names, UI concepts, or secrets to public packages.
